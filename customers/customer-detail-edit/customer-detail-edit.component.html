@@ -1,0 +1,60 @@
+<ActionBar class="action-bar">
+    <!--HACK - we should remove the navigation button-->
+    <NavigationButton visibility="collapsed"></NavigationButton>
+    <ActionItem ios.position="left" android.position="left" (tap)="onCancelButtonTap()">
+        <Label text="Cancel" class="action-item"></Label>
+    </ActionItem>
+    <Label class="action-bar-title" [text]="editDetailTitle" horizontalAlignment="center"></Label>
+    <ActionItem ios.position="right" android.position="right">
+        <Label text="Done" class="action-item" verticalAlignment="center" (tap)="onDoneButtonTap()"
+            [isEnabled]="nameModel.valid"
+            [isUserInteractionEnabled]="nameModel.valid">
+        </Label>
+    </ActionItem>
+</ActionBar>
+
+
+<GridLayout class="page page-content">
+        <ScrollView>
+            <StackLayout class="item-list">
+
+                <Label text="CustNum" class="item-list-odd"></Label>
+                <TextField   [(ngModel)]="customer.CustNum" class="item-list-even" isEnabled=true></TextField>
+         
+                <Label text="Customer Name" class="item-list-odd"></Label>
+                <TextField #nameModel="ngModel" hint="Customer Name field is required" [(ngModel)]="customer.Name" class="item-list-even" required></TextField>
+            
+                <Label text="Address" class="item-list-odd"></Label>
+                <TextField  [(ngModel)]="customer.Address" class="item-list-even"></TextField>
+
+                <Label text="State" class="item-list-odd"></Label>
+                <ListPicker [items]="stateNames" [selectedIndex]="stateIndexValue" (selectedIndexChange)="selectedIndexChanged($event)" class="p-15"></ListPicker>
+
+                <Label text="Country" class="item-list-odd"></Label>
+                <TextField  [(ngModel)]="customer.Country" class="item-list-even"></TextField>
+
+                <Label text="Sales Rep" class="item-list-odd"></Label>
+                <TextField [(ngModel)]="customer.SalesRep" class="item-list-even"></TextField>
+
+                <GridLayout rows="*, 55" columns="*, auto" class="car-list-odd">
+                    <Label text="Credit Limit"></Label>
+                    <Label col="1" horizontalAlignment="right" class="text-primary">
+                            <FormattedString>
+                                <Span text="$ "></Span>
+                                <Span [text]="creditLimitValue"></Span>
+                            </FormattedString>
+                        </Label>
+                        <Slider row="1" colSpan="2" minValue="0" maxValue="10000" [(ngModel)]="creditLimitValue"></Slider>
+                </GridLayout>
+                <Label text="" [class]="toggleOdd"></Label>
+                <Label text="    Delete Customer" [class]="toggleAdd"  verticalAlignment="center" (tap)="onDeleteButtonTap()"
+                    [isEnabled]="nameModel.valid"
+                    [isUserInteractionEnabled]="nameModel.valid">
+                </Label>
+                <Label text="" [class]="toggleOdd"></Label>
+            </StackLayout>
+    
+        </ScrollView>
+    
+        <ActivityIndicator [busy]="isBusy"></ActivityIndicator>
+    </GridLayout>
