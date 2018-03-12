@@ -1,0 +1,6 @@
+<StackLayout #container *ngIf="_isNotAnonymous">
+    <TextField hint="Email Address" keyboardType="email" [(ngModel)]="username"
+        autocorrect="false" autocapitalizationType="none"></TextField>
+    <TextField hint="Password" secure="true" [(ngModel)]="password"></TextField>
+    <Button text="Log In" (tap)="login()"></Button>
+</StackLayout>
