@@ -1,9 +1,15 @@
 export class JsdoSettings {
-    static serviceURI = "http://oemobiledemo.progress.com/OEMobileDemoServices";
-    static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServices/static/CustomerService.json";
-    static authenticationModel = "Anonymous";
+    //static serviceURI = "http://oemobiledemo.progress.com/OEMobileDemoServices";
+    //static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServices/static/SportsService.json";
+    // static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServices/static/CustomerService.json";
+    //static authenticationModel = "Anonymous";
     static resourceName = "Customer";
     static tableRef = "ttCustomer";
+
+    static serviceURI = "http://oemobiledemo.progress.com/OEMobileDemoServicesBasic";
+    static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServicesBasic/static/SportsService.json";
+    static authenticationModel = "Basic";
+
     // StateService (in state.service.ts) represents a data service which provides state info.
     // The state resource can be found in the web application specified by the above serviceURI property
     static stateResourceName = "State";
@@ -31,8 +37,19 @@ export class JsdoSettings {
     // static filter = "CustNum <= 11";
     // static sort = "";
 
-    static filter = { field: "CustNum", operator: "lte", value: 11 };
-    static sort = { field: "Name", dir: "asc" };
+    static filterORIG = { field: "CustNum", operator: "lte", value: 11 };
+    static sortORIG = { field: "Name", dir: "asc" };
+
+    static sort = { };
+
+    static filter = {
+        logic: "or",
+        filters: [
+            { field: "CustNum", operator: "lte", value: 21 },
+            { field: "Name", operator: "startswith", value: "NEW-ONE" }
+        ]
+      }
+
 
     // Filter expression used by the SearchBar field
     // $SEARCH token is replaced by the value entered in the field

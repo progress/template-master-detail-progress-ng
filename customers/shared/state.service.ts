@@ -10,10 +10,13 @@ import { State } from "./state.model";
 import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
 
 
+/* *************************************************************************************
+ * The StateService handles all the data operations of retrieving state data.
+ *
+ * It relies upon a ProgressService so it can create a DataSource for the state data.
+ * It is a read-only data service used to provide state info.
+***************************************************************************************/
 
-/* ***********************************************************
- * This is a read-only data service used to provide state info.
- *************************************************************/
 @Injectable()
 export class StateService {
     private dataSource: DataSource;

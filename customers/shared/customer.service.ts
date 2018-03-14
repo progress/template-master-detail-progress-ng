@@ -9,10 +9,12 @@ import { Customer } from "./customer.model";
 import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
 import { JsdoSettings } from "../../shared/jsdo.settings";
 
-/* ***********************************************************
-* This is the master detail data service. It handles all the data operations
-* of retrieving and updating the data. In this case, it is connected to a Progress Data Service and
-*************************************************************/
+/* *************************************************************************************
+ * The CustomerService handles all the data operations of retrieving and updating 
+ * customer data.
+ *
+ * It relies upon a ProgressService so it can create a DataSource for the customer data.
+***************************************************************************************/
 @Injectable()
 export class CustomerService {
 

@@ -8,7 +8,6 @@ export class CustomerEditService {
     private _editModel: Customer;
 
     constructor(private _customerService: CustomerService) {
-        console.log("DEBUG: customer-edit.service.ts constructor");
     }
 
     startEdit(id: string): Customer {

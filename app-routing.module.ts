@@ -1,7 +1,7 @@
 import { NgModule } from "@angular/core";
 import { Routes } from "@angular/router";
 import { NativeScriptRouterModule } from "nativescript-angular/router";
-import { LoginComponent } from "./pages/login/login.component";
+import { LoginComponent } from "./login/login.component";
 import { LoginGuard } from "./shared/login-guard.service";
 
 const routes: Routes = [
