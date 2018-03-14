@@ -38,7 +38,7 @@ The template also provides a data service:
 - `/customers/shared/customer.service.ts` - serves as a data layer for the master-detail data items. Wraps the functions that are used to make operations on the OpenEdge database.
 
 There is 2nd model to represent state items to be used in a ListPicker when editing a customer row:
-- `/customers/shared/customer.model.ts`
+- `/customers/shared/state.model.ts`
 
 The template also provides a state data service to retreive state items from an OpenEdge database:
 - `/customers/shared/state.service.ts`
