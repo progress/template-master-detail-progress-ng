@@ -3,6 +3,7 @@ import { NativeScriptCommonModule } from "nativescript-angular/common";
 import { NativeScriptFormsModule } from "nativescript-angular/forms";
 import { NativeScriptUIListViewModule } from "nativescript-pro-ui/listview/angular";
 
+import { SharedModule } from "../shared/shared.module";
 import { CustomerDetailEditComponent } from "./customer-detail-edit/customer-detail-edit.component";
 import { MyImageAddRemoveComponent } from "./customer-detail-edit/my-image-add-remove/my-image-add-remove.component";
 import { MyListSelectorModalViewComponent } from "./customer-detail-edit/my-list-selector/my-list-selector-modal-view.component"; // tslint:disable-line:max-line-length
@@ -19,7 +20,8 @@ import { StateService } from "./shared/state.service";
         CustomersRoutingModule,
         NativeScriptCommonModule,
         NativeScriptFormsModule,
-        NativeScriptUIListViewModule
+        NativeScriptUIListViewModule,
+        SharedModule
     ],
     declarations: [
         CustomerListComponent,

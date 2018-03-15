@@ -62,5 +62,25 @@ export class JsdoSettings {
 //             { field: "Name", operator: "contains", value: "$SEARCH" }
 //         ]
 //     };
-    
+//     static stateResourceName = "State";
+//     static stateTableRef = "ttState";
+// }
+
+// FORM JSDOSettings
+// export class JsdoSettings {
+//     static serviceURI = "http://oemobiledemo.progress.com/OEMobileDemoServicesForm";
+//     static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServicesForm/static/CustomerService.json";
+//     static authenticationModel = "Form";
+//     static resourceName = "Customer";
+//     static tableRef = "ttCustomer";
+//     static filter = "CustNum <= 12";
+//     static sort = { field: "Name", dir: "asc" };
+//     static searchFilter = {
+//         filters: [
+//             { field: "CustNum", operator: "lte", value: 11 },
+//             { field: "Name", operator: "contains", value: "$SEARCH" }
+//         ]
+//     };
+//     static stateResourceName = "State";
+//     static stateTableRef = "ttState";
 // }
