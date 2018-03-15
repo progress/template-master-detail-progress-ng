@@ -8,6 +8,7 @@ import { Customer } from "./customer.model";
 
 import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
 import { JsdoSettings } from "../../shared/jsdo.settings";
+import { ProgressService } from "../../shared/progress.service";
 
 /* ***********************************************************
 * This is the master detail data service. It handles all the data operations
@@ -20,8 +21,16 @@ export class CustomerService {
     private dataSource: DataSource;
     private jsdoSettings: JsdoSettings = new JsdoSettings();
 
-    constructor(private _ngZone: NgZone) {
-        // console.log("DEBUG: In customer.service.ts: constructor()");
+    constructor(private _ngZone: NgZone,
+                private _progressService: ProgressService) {
+        // Basically, if a logout event is triggered by our progress service,
+        // we clear out the data source. Because we're good people
+        this._progressService.isLoggedin$.subscribe((isLoggedIn) => {
+            console.log("we got triggered: " + isLoggedIn);
+            if (!isLoggedIn) {
+                this.dataSource = undefined;
+            }
+        });
      }
 
     getCustomerById(id: string): Customer {
@@ -91,7 +100,7 @@ export class CustomerService {
     }
 
     // Called for either existing record with changes or for created record.
-    // For created record, createNewRecord() is first called 
+    // For created record, createNewRecord() is first called
     update(dataModel: Customer): Promise<any> {
         let ret = false;
 

@@ -1,6 +1,20 @@
-<StackLayout #container *ngIf="_isNotAnonymous">
-    <TextField hint="Email Address" keyboardType="email" [(ngModel)]="username"
-        autocorrect="false" autocapitalizationType="none"></TextField>
-    <TextField hint="Password" secure="true" [(ngModel)]="password"></TextField>
-    <Button text="Log In" (tap)="login()"></Button>
-</StackLayout>
+<ActionBar  class="action-bar">        
+    <Label class="action-bar-title" text="Customers" horizontalAlignment="center"></Label>
+</ActionBar>
+
+<GridLayout>
+    <StackLayout #container *ngIf="_isNotAnonymous" backgroundColor="transparent">
+        <TextField hint="Email Address" keyboardType="email" [(ngModel)]="username"
+            autocorrect="false" autocapitalizationType="none" isEnabled="{{!isAuthenticating}}"></TextField>
+        <TextField hint="Password" secure="true" [(ngModel)]="password" isEnabled="{{!isAuthenticating}}"></TextField>
+        <Button text="Log In   &#xf023;" (tap)="login()" isEnabled="{{!isAuthenticating}}" 
+            class="btn btn-rounded-lg fa" backgroundColor="#3A53FF" color="#FFFFFF"></Button>
+    </StackLayout>
+
+    <!-- This thing is for the ActivityIndicator to pop up when we're doing something -->
+    <StackLayout class="dimmer" visibility="{{isAuthenticating ? 'visible' : 'collapsed'}}">
+    </StackLayout>
+    <GridLayout backgroundColor="transparent" rows="*" visibility="{{isAuthenticating ? 'visible' : 'collapsed'}}">
+        <ActivityIndicator busy="true"></ActivityIndicator>
+    </GridLayout>
+</GridLayout>
