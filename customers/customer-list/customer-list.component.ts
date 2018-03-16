@@ -1,8 +1,9 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { ObservableArray } from "data/observable-array";
 import { RouterExtensions } from "nativescript-angular/router";
 import { ListViewEventData } from "nativescript-pro-ui/listview";
-
+import { DrawerTransitionBase, SlideInOnTopTransition } from "nativescript-pro-ui/sidedrawer";
+import { RadSideDrawerComponent } from "nativescript-pro-ui/sidedrawer/angular";
 import { isAndroid, isIOS } from "platform";
 
 import { EventData, View } from "tns-core-modules/ui/core/view/view";
@@ -10,7 +11,6 @@ import { alert, confirm } from "tns-core-modules/ui/dialogs";
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { Customer } from "../shared/customer.model";
 import { CustomerService } from "../shared/customer.service";
-import { ProgressService } from "../../shared/progress.service";
 
 const SEARCH_DELAY = 300;
 
@@ -26,25 +26,26 @@ const SEARCH_DELAY = 300;
     styleUrls: ["./customer-list.component.scss"]
 })
 export class CustomerListComponent implements OnInit {
+    @ViewChild("drawer") drawerComponent: RadSideDrawerComponent;
+
     search: string;
 
     private _isLoading: boolean = false;
     private _customers: ObservableArray<Customer> = new ObservableArray<Customer>([]);
     private timer;
-    private _isNotAnonymous: boolean = (JsdoSettings.authenticationModel !== "Anonymous");
     private isAndroid: boolean = isAndroid;
     private isIOS: boolean = isIOS;
+    private _sideDrawerTransition: DrawerTransitionBase;
 
     constructor(
         private _customerService: CustomerService,
-        private _routerExtensions: RouterExtensions,
-        private progressService: ProgressService
+        private _routerExtensions: RouterExtensions
     ) {
     }
 
     /* ***********************************************************
     * Use the "ngOnInit" handler to get the data and assign it to the
-    * private property that holds it inside the component. 
+    * private property that holds it inside the component.
     *************************************************************/
     ngOnInit(): void {
         this._isLoading = true;
@@ -78,16 +79,14 @@ export class CustomerListComponent implements OnInit {
         return this._isLoading;
     }
 
-    onLogout (): void {
-        confirm("Are you sure you want to log out?")
-            .then((result) => {
-                if (result) {
-                    return this.progressService.logout()
-                        .then((result) => {
-                            this._routerExtensions.navigate(["/login"], { clearHistory: true });        
-                        });
-                }
-            });
+    get sideDrawerTransition(): DrawerTransitionBase {
+        return this._sideDrawerTransition;
+    }
+
+    // According to guidelines, if you have a drawer on your page, you should always
+    // have a button that opens it. Use the showDrawer() function to open the app drawer section.
+    onDrawerButtonTap(): void {
+        this.drawerComponent.sideDrawer.showDrawer();
     }
 
     onAddButtonTap(): void {
@@ -135,7 +134,7 @@ export class CustomerListComponent implements OnInit {
         swipeLimits.right = rightItem.getMeasuredWidth();
         swipeLimits.threshold = rightItem.getMeasuredWidth() / 4;
     }
-    
+
     onRightSwipeClick(args: ListViewEventData) {
         // debugger;
         const customerItem = args.view.bindingContext;

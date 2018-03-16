@@ -3,6 +3,7 @@ import { NativeScriptCommonModule } from "nativescript-angular/common";
 import { NativeScriptFormsModule } from "nativescript-angular/forms";
 import { NativeScriptUIListViewModule } from "nativescript-pro-ui/listview/angular";
 
+import { SharedModule } from "../shared/shared.module";
 import { CustomerDetailEditComponent } from "./customer-detail-edit/customer-detail-edit.component";
 import { CustomerDetailComponent } from "./customer-detail/customer-detail.component";
 import { CustomerListComponent } from "./customer-list/customer-list.component";
@@ -16,7 +17,8 @@ import { StateService } from "./shared/state.service";
         CustomersRoutingModule,
         NativeScriptCommonModule,
         NativeScriptFormsModule,
-        NativeScriptUIListViewModule
+        NativeScriptUIListViewModule,
+        SharedModule
     ],
     declarations: [
         CustomerListComponent,
