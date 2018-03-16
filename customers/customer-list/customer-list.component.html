@@ -1,15 +1,15 @@
 <ActionBar  class="action-bar">
     <!-- Menu Button for Android -->
     <NavigationButton 
-        *ngIf="isAndroid && _isNotAnonymous"
+        *ngIf="isAndroid" 
         icon="res://ic_menu_white_24dp"
-        (tap)="onLogout()">
+        (tap)="onDrawerButtonTap()">
     </NavigationButton>
 
     <!-- Menu Button for iOS -->
     <ActionItem
-        (tap)="onLogout()"
-        *ngIf="isiOS && _isNotAnonymous"
+        (tap)="onDrawerButtonTap()"
+        *ngIf="isiOS"
         ios.position="left">
         <Image src="res://ic_menu_white"></Image>
     </ActionItem>
@@ -19,27 +19,38 @@
                     android.systemIcon="ic_menu_add"></ActionItem>    
 </ActionBar>
 
-<GridLayout rows="50, *" class="page page-content">
-    <SearchBar hint="Search" row="0" [(ngModel)]="search" (ngModelChange)="onSearchChange($event)" (loaded)="onSearchBarLoaded($event)"></SearchBar>
-    <RadListView id="listView" [items]="customers" row="1" selectionBehavior="None"  pullToRefresh="false" 
-    (itemSwipeProgressStarted)="onSwipeCellStarted($event)" (itemTap)="onCustomerItemTap($event)" swipeActions="true" class="list-group">
+<RadSideDrawer #drawer showOverNavigation="true" [drawerTransition]="sideDrawerTransition">
     <!--
-    RadListView is a UI component part of the Progress NativeScript UI set of components.
-    Learn more about the RadListView UI component and how it can be customized in this documentation article:
-    http://docs.telerik.com/devtools/nativescript-ui/Controls/Angular/ListView/getting-started
-    This component is used to display the master list in the master-detail structure. 
+    Use the tkDrawerContent directive to display the content of the app drawer on this page.
     -->
-        <ng-template tkListItemTemplate let-customer="item">
-            <StackLayout orientation="vertical" class="list-group-item">
-                    <Label [text]="customer.Name" class="list-group-item-content text-primary font-weight-bold"></Label>   
-            </StackLayout>
-        </ng-template>
-        <GridLayout *tkListItemSwipeTemplate columns="*, auto"  >
-                <StackLayout id="delete-view" col="1" (tap)="onRightSwipeClick($event)" orientation="horizontal" class="list-group-item-swipe" >
-                    <Label text="Delete"  class="list-group-item-swipe-content text-white" ></Label>
+    <StackLayout tkDrawerContent>
+        <SideDrawer [selectedPage]="'Customers'" [sideDrawer]="drawerComponent"></SideDrawer>
+    </StackLayout>
+    
+    <!--
+    Use the tkMainContent directive to display the content of the page when you have an app drawer.
+    -->
+    <GridLayout rows="50, *" class="page page-content" tkMainContent>
+        <SearchBar hint="Search" row="0" [(ngModel)]="search" (ngModelChange)="onSearchChange($event)" (loaded)="onSearchBarLoaded($event)"></SearchBar>
+        <RadListView id="listView" [items]="customers" row="1" selectionBehavior="None"  pullToRefresh="false" 
+        (itemSwipeProgressStarted)="onSwipeCellStarted($event)" (itemTap)="onCustomerItemTap($event)" swipeActions="true" class="list-group">
+        <!--
+        RadListView is a UI component part of the Progress NativeScript UI set of components.
+        Learn more about the RadListView UI component and how it can be customized in this documentation article:
+        http://docs.telerik.com/devtools/nativescript-ui/Controls/Angular/ListView/getting-started
+        This component is used to display the master list in the master-detail structure. 
+        -->
+            <ng-template tkListItemTemplate let-customer="item">
+                <StackLayout orientation="vertical" class="list-group-item">
+                        <Label [text]="customer.Name" class="list-group-item-content text-primary font-weight-bold"></Label>   
                 </StackLayout>
-            </GridLayout>
-    </RadListView>
-
-    <!-- <ActivityIndicator [busy]="isLoading"></ActivityIndicator> -->
-</GridLayout>
+            </ng-template>
+            <GridLayout *tkListItemSwipeTemplate columns="*, auto"  >
+                    <StackLayout id="delete-view" col="1" (tap)="onRightSwipeClick($event)" orientation="horizontal" class="list-group-item-swipe" >
+                        <Label text="Delete"  class="list-group-item-swipe-content text-white" ></Label>
+                    </StackLayout>
+                </GridLayout>
+        </RadListView>
+    
+    </GridLayout>
+</RadSideDrawer>

@@ -2,8 +2,8 @@ import { progress } from "@progress/jsdo-core";
 
 import { JsdoSettings } from "./jsdo.settings";
 
-import { Component } from "@angular/core";
-import { Injectable } from "@angular/core";
+import { Component, Injectable } from "@angular/core";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 /* *************************************************************************************
  * The ProgressService provides access to Progress Data Object resources.
@@ -13,34 +13,28 @@ import { Injectable } from "@angular/core";
  *      - A progress.data.JSDOSession instance is created.
  *      - The login is established.
  *      - The specified Data Service catalog is loaded.
- * 
+ *
  * After login, the progress.data.JSDOSession instance is then ready to support the creation
  * of DataSources for any resource specified in the Data Service catalog.
  *
  * When logout is performed:
  *      - The login session is terminated.
- *      - The progress.data.JSDOSession instance is disabled, rendering it unable to start 
+ *      - The progress.data.JSDOSession instance is disabled, rendering it unable to start
  *        a new login session.
 ***************************************************************************************/
 
-
-
 @Injectable()
 export class ProgressService {
-  
+
+  isLoggedin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+
   private jsdosession: progress.data.JSDOSession;
-
-  constructor() {
-  }
-
-  ngOnInit() {
-    this.jsdosession = undefined;
-  }
 
   isLoggedIn() {
     if (this.jsdosession) {
       return true;
     }
+
     return false;
   }
 
@@ -50,19 +44,22 @@ export class ProgressService {
         authenticationModel: JsdoSettings.authenticationModel,
         serviceURI: JsdoSettings.serviceURI,
         catalogURI: JsdoSettings.catalogURI,
-        username: (JsdoSettings.authenticationModel === 'Anonymous') ? '' : username, 
-        password: (JsdoSettings.authenticationModel === 'Anonymous') ? '' : password
+        username: (JsdoSettings.authenticationModel === "Anonymous") ? "" : username,
+        password: (JsdoSettings.authenticationModel === "Anonymous") ? "" : password
     })
     .then((result) => {
       this.jsdosession = result.jsdosession;
+      this.isLoggedin$.next(true);
+
       return result;
     });
   }
 
   logout() {
-    var promise = this.jsdosession.invalidate();
+    const promise = this.jsdosession.invalidate();
 
     this.jsdosession = undefined;
+    this.isLoggedin$.next(false);
 
     return promise;
   }
