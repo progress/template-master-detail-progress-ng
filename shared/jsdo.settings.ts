@@ -1,6 +1,6 @@
 export class JsdoSettings {
-    static serviceURI = "http://oemobiledemo.progress.com/OEMobileDemoServices";
-    static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServices/static/CustomerService.json";
+    static serviceURI = "https://oemobiledemo.progress.com/OEMobileDemoServices";
+    static catalogURI = "https://oemobiledemo.progress.com/OEMobileDemoServices/static/CustomerService.json";
     static authenticationModel = "Anonymous";
     static resourceName = "Customer";
     static tableRef = "ttCustomer";
