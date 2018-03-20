@@ -130,12 +130,13 @@ export class CustomerListComponent implements OnInit {
     onSwipeCellStarted(args: ListViewEventData) {
         const swipeLimits = args.data.swipeLimits;
         const swipeView = args.object;
-        const rightItem = swipeView.getViewById<View>("delete-view");
-        swipeLimits.right = rightItem.getMeasuredWidth();
-        swipeLimits.threshold = rightItem.getMeasuredWidth() / 4;
+        const leftItem = swipeView.getViewById<View>("delete-view");
+        swipeLimits.right = leftItem.getMeasuredWidth();
+        swipeLimits.left = 0;
+        swipeLimits.threshold = leftItem.getMeasuredWidth();
     }
 
-    onRightSwipeClick(args: ListViewEventData) {
+    onLeftSwipeClick(args: ListViewEventData) {
         // debugger;
         const customerItem = args.view.bindingContext;
         const customerName = customerItem.Name;
