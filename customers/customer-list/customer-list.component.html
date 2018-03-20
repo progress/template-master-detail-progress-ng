@@ -46,7 +46,7 @@
                 </StackLayout>
             </ng-template>
             <GridLayout *tkListItemSwipeTemplate columns="*, auto"  >
-                    <StackLayout id="delete-view" col="1" (tap)="onRightSwipeClick($event)" orientation="horizontal" class="list-group-item-swipe" >
+                    <StackLayout id="delete-view" col="1" (tap)="onLeftSwipeClick($event)" orientation="horizontal" class="list-group-item-swipe" >
                         <Label text="Delete"  class="list-group-item-swipe-content text-white" ></Label>
                     </StackLayout>
                 </GridLayout>
