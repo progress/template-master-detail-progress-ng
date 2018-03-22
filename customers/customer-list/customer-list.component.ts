@@ -93,15 +93,15 @@ export class CustomerListComponent implements OnInit {
         if (!this._customerService.hasEditSupport()) {
             alert("Service does not provide Add functionality.");
         } else {
-        this._routerExtensions.navigate(["/customers/customer-detail-edit", -1, true],
-            {
-                animated: true,
-                transition: {
-                    name: "slideTop",
-                    duration: 200,
-                    curve: "ease"
-                }
-            });
+            this._routerExtensions.navigate(["/customers/customer-detail-edit", -1, true],
+                {
+                    animated: true,
+                    transition: {
+                        name: "slideTop",
+                        duration: 200,
+                        curve: "ease"
+                    }
+                });
         }
     }
 
@@ -178,10 +178,10 @@ export class CustomerListComponent implements OnInit {
     onSearchChange(args: EventData) {
         let searchFilter: any = JsdoSettings.searchFilter;
         try {
-            if (typeof(searchFilter) === "object") {
+            if (typeof (searchFilter) === "object") {
                 searchFilter = JSON.parse(
                     JSON.stringify(searchFilter).replace("$SEARCH", this.search));
-            } else if (typeof(searchFilter) === "string") {
+            } else if (typeof (searchFilter) === "string") {
                 searchFilter = searchFilter.replace("$SEARCH", this.search);
             } else {
                 searchFilter = "";
@@ -223,5 +223,36 @@ export class CustomerListComponent implements OnInit {
         if (event.object.android) {
             event.object.android.clearFocus();
         }
+    }
+
+    // This gets triggered when refresh (Pull down) operation is performed in the Listview
+    // in mobile app. As part of this we perform a read() operation with same filter criteria
+    // such that all records are fetched again from server
+    onPullToRefreshInitiated(args: ListViewEventData) {
+        console.log("In onPullToRefreshInitiated()");       
+
+        // We want to use the same filter criteria while refreshing the listview
+        const params = {
+            filter: JsdoSettings.filter,
+            sort: JsdoSettings.sort
+        };
+
+        this._customerService.load(params)
+            .finally(() => {
+                this._isLoading = false
+            })
+            .subscribe((customers: Array<Customer>) => {
+                this._customers = new ObservableArray(customers);
+                this._isLoading = false;
+            }, (error) => {
+                console.log("In onPullToRefreshInitiated() Error section: " + error);
+                if (error && error.message) {
+                    alert("Error: \n" + error.message);
+                } else {
+                    alert("Error reading records.");
+                }
+            });
+        var listView = args.object;
+        listView.notifyPullToRefreshFinished();
     }
 }

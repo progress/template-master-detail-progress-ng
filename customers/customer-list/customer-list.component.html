@@ -32,7 +32,7 @@
     -->
     <GridLayout rows="50, *" class="page page-content" tkMainContent>
         <SearchBar hint="Search" row="0" [(ngModel)]="search" (ngModelChange)="onSearchChange($event)" (loaded)="onSearchBarLoaded($event)"></SearchBar>
-        <RadListView id="listView" [items]="customers" row="1" selectionBehavior="None"  pullToRefresh="false" 
+        <RadListView id="listView" [items]="customers" row="1" selectionBehavior="None"  pullToRefresh="true" (pullToRefreshInitiated)="onPullToRefreshInitiated($event)"
         (itemSwipeProgressStarted)="onSwipeCellStarted($event)" (itemTap)="onCustomerItemTap($event)" swipeActions="true" class="list-group">
         <!--
         RadListView is a UI component part of the Progress NativeScript UI set of components.
