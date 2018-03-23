@@ -120,9 +120,10 @@ export class CustomerDetailEditComponent implements OnInit {
      *  - the list page for a create
     *************************************************************/
     onCancelButtonTap(): void {
+        // Remove new record or updates to record from client memory
+        this._customerService.cancelChanges();
+        
         if (this._addMode) {
-            // Remove newly created record from client memory
-            this._customerService.cancelChanges();
             this._routerExtensions.navigate(["/customers"], {
                 clearHistory: true,
                 animated: true,
