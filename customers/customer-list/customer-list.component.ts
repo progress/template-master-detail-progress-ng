@@ -142,7 +142,7 @@ export class CustomerListComponent implements OnInit {
                     this._customerService.delete(customerItem)
                         .then((result1) => {
                             // Delete was successful, so we can accept the changes
-                            this._customerService.acceptChanges();                            
+                            this._customerService.acceptChanges();
                             this._fetchCustomers();
                         }, (error) => {
                             // Delete was not successful, so let's back out the deletion
@@ -163,7 +163,7 @@ export class CustomerListComponent implements OnInit {
             });
     }
 
-    onSearchChange(args: EventData) {
+    onSearchChange(args?: EventData) {
         let searchFilter: any = JsdoSettings.searchFilter;
         try {
             if (typeof (searchFilter) === "object") {
@@ -199,21 +199,30 @@ export class CustomerListComponent implements OnInit {
             event.object.android.clearFocus();
         }
     }
-
-    // This gets triggered when refresh (Pull down) operation is performed in the Listview
-    // in mobile app. As part of this we perform a read() operation with same filter criteria
-    // such that all records are fetched again from server
+    
+    /**
+     * This gets triggered when refresh (Pull down) operation is performed in the Listview
+     * in mobile app. As part of this we perform a read() operation with same filter criteria
+     * such that all records are fetched again from server
+     * @param args - ListViewEventData
+     */
     onPullToRefreshInitiated(args: ListViewEventData) {
         console.log("In onPullToRefreshInitiated()");
 
-        // We want to use the same filter criteria while refreshing the listview
-        const params = {
-            filter: JsdoSettings.filter,
-            sort: JsdoSettings.sort
-        };
+        // Check for the value of ngModel's search value. If it is set then perform the read based on search criteria
+        // If this no set, the read customer information from server via Data Service directly
+        if (this.search === undefined) {
+            // We want to use the same filter criteria while refreshing the listview
+            const params = {
+                filter: JsdoSettings.filter,
+                sort: JsdoSettings.sort
+            };
 
-        this._fetchCustomers(params);
-
+            this._fetchCustomers(params);
+        } else {
+            this.onSearchChange();
+        }
+        
         var listView = args.object;
         listView.notifyPullToRefreshFinished();
     }
