@@ -56,19 +56,7 @@ export class CustomerListComponent implements OnInit {
         * Check out the service in customers/shared/customer.service.ts
         *************************************************************/
 
-        this._customerService.load()
-            .finally(() => this._isLoading = false)
-            .subscribe((customers: Array<Customer>) => {
-                this._customers = new ObservableArray(customers);
-                this._isLoading = false;
-            }, (error) => {
-                console.log("DEBUG, in ngOnIOnit: " + error);
-                if (error && error.message) {
-                    alert("Error: \n" + error.message);
-                } else {
-                    alert("Error  reading records.");
-                }
-            });
+        this._fetchCustomers();
     }
 
     get customers(): ObservableArray<Customer> {
@@ -93,15 +81,15 @@ export class CustomerListComponent implements OnInit {
         if (!this._customerService.hasEditSupport()) {
             alert("Service does not provide Add functionality.");
         } else {
-        this._routerExtensions.navigate(["/customers/customer-detail-edit", -1, true],
-            {
-                animated: true,
-                transition: {
-                    name: "slideTop",
-                    duration: 200,
-                    curve: "ease"
-                }
-            });
+            this._routerExtensions.navigate(["/customers/customer-detail-edit", -1, true],
+                {
+                    animated: true,
+                    transition: {
+                        name: "slideTop",
+                        duration: 200,
+                        curve: "ease"
+                    }
+                });
         }
     }
 
@@ -155,7 +143,7 @@ export class CustomerListComponent implements OnInit {
                         .then((result1) => {
                             // Delete was successful, so we can accept the changes
                             this._customerService.acceptChanges();
-                            this.ngOnInit();
+                            this._fetchCustomers();
                         }, (error) => {
                             // Delete was not successful, so let's back out the deletion
                             this._customerService.cancelChanges();
@@ -175,13 +163,13 @@ export class CustomerListComponent implements OnInit {
             });
     }
 
-    onSearchChange(args: EventData) {
+    onSearchChange(args?: EventData) {
         let searchFilter: any = JsdoSettings.searchFilter;
         try {
-            if (typeof(searchFilter) === "object") {
+            if (typeof (searchFilter) === "object") {
                 searchFilter = JSON.parse(
                     JSON.stringify(searchFilter).replace("$SEARCH", this.search));
-            } else if (typeof(searchFilter) === "string") {
+            } else if (typeof (searchFilter) === "string") {
                 searchFilter = searchFilter.replace("$SEARCH", this.search);
             } else {
                 searchFilter = "";
@@ -202,20 +190,7 @@ export class CustomerListComponent implements OnInit {
             clearTimeout(this.timer);
         }
         this.timer = setTimeout(() => {
-            this._customerService.load(params)
-                .finally(() => {
-                    this._isLoading = false;
-                })
-                .subscribe((customers: Array<Customer>) => {
-                    this._customers = new ObservableArray(customers);
-                    this._isLoading = false;
-                }, (error) => {
-                    if (error && error.message) {
-                        alert("Error: \n" + error.message);
-                    } else {
-                        alert("Error  reading records.");
-                    }
-                });
+            this._fetchCustomers(params);
         }, SEARCH_DELAY);
     }
 
@@ -223,5 +198,56 @@ export class CustomerListComponent implements OnInit {
         if (event.object.android) {
             event.object.android.clearFocus();
         }
+    }
+    
+    /**
+     * This gets triggered when refresh (Pull down) operation is performed in the Listview
+     * in mobile app. As part of this we perform a read() operation with same filter criteria
+     * such that all records are fetched again from server
+     * @param args - ListViewEventData
+     */
+    onPullToRefreshInitiated(args: ListViewEventData) {
+        console.log("In onPullToRefreshInitiated()");
+
+        // Check for the value of ngModel's search value. If it is set then perform the read based on search criteria
+        // If this no set, the read customer information from server via Data Service directly
+        if (this.search === undefined) {
+            // We want to use the same filter criteria while refreshing the listview
+            const params = {
+                filter: JsdoSettings.filter,
+                sort: JsdoSettings.sort
+            };
+
+            this._fetchCustomers(params);
+        } else {
+            this.onSearchChange();
+        }
+        
+        var listView = args.object;
+        listView.notifyPullToRefreshFinished();
+    }
+
+    /**
+     * This function is responsible for fetching customers remotely via 
+     * Progress Data Service
+     * @param params - A parameter object which includes filtering and
+     * sorting criteria
+     */
+    private _fetchCustomers(params?: any) {
+        this._customerService.load(params)
+            .finally(() => {
+                this._isLoading = false
+            })
+            .subscribe((customers: Array<Customer>) => {
+                this._customers = new ObservableArray(customers);
+                this._isLoading = false;
+            }, (error) => {
+                console.log("In _fetchCustomers() Error section: " + error);
+                if (error && error.message) {
+                    alert("Error: \n" + error.message);
+                } else {
+                    alert("Error reading records.");
+                }
+            });
     }
 }
