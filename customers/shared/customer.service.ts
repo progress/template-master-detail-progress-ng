@@ -146,10 +146,9 @@ export class CustomerService {
         promise = new Promise(
             (resolve, reject) => {
                 // Call dataSource.saveChanges() to send any pending changes to backend
-                this.dataSource.saveChanges()
-                    .then((result) => {
-                        resolve(result);
-                    }).catch((errors) => {
+                this.dataSource.saveChanges().subscribe(()=>{
+                    resolve();
+                }, (errors) => {
                         let errorMsg: string = "SaveChanges failed..";
 
                         if (errors) {
