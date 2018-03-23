@@ -56,19 +56,7 @@ export class CustomerListComponent implements OnInit {
         * Check out the service in customers/shared/customer.service.ts
         *************************************************************/
 
-        this._customerService.load()
-            .finally(() => this._isLoading = false)
-            .subscribe((customers: Array<Customer>) => {
-                this._customers = new ObservableArray(customers);
-                this._isLoading = false;
-            }, (error) => {
-                console.log("DEBUG, in ngOnIOnit: " + error);
-                if (error && error.message) {
-                    alert("Error: \n" + error.message);
-                } else {
-                    alert("Error  reading records.");
-                }
-            });
+        this._fetchCustomers();
     }
 
     get customers(): ObservableArray<Customer> {
@@ -154,8 +142,8 @@ export class CustomerListComponent implements OnInit {
                     this._customerService.delete(customerItem)
                         .then((result1) => {
                             // Delete was successful, so we can accept the changes
-                            this._customerService.acceptChanges();
-                            this.ngOnInit();
+                            this._customerService.acceptChanges();                            
+                            this._fetchCustomers();
                         }, (error) => {
                             // Delete was not successful, so let's back out the deletion
                             this._customerService.cancelChanges();
@@ -202,20 +190,7 @@ export class CustomerListComponent implements OnInit {
             clearTimeout(this.timer);
         }
         this.timer = setTimeout(() => {
-            this._customerService.load(params)
-                .finally(() => {
-                    this._isLoading = false;
-                })
-                .subscribe((customers: Array<Customer>) => {
-                    this._customers = new ObservableArray(customers);
-                    this._isLoading = false;
-                }, (error) => {
-                    if (error && error.message) {
-                        alert("Error: \n" + error.message);
-                    } else {
-                        alert("Error  reading records.");
-                    }
-                });
+            this._fetchCustomers(params);
         }, SEARCH_DELAY);
     }
 
@@ -229,7 +204,7 @@ export class CustomerListComponent implements OnInit {
     // in mobile app. As part of this we perform a read() operation with same filter criteria
     // such that all records are fetched again from server
     onPullToRefreshInitiated(args: ListViewEventData) {
-        console.log("In onPullToRefreshInitiated()");       
+        console.log("In onPullToRefreshInitiated()");
 
         // We want to use the same filter criteria while refreshing the listview
         const params = {
@@ -237,6 +212,19 @@ export class CustomerListComponent implements OnInit {
             sort: JsdoSettings.sort
         };
 
+        this._fetchCustomers(params);
+
+        var listView = args.object;
+        listView.notifyPullToRefreshFinished();
+    }
+
+    /**
+     * This function is responsible for fetching customers remotely via 
+     * Progress Data Service
+     * @param params - A parameter object which includes filtering and
+     * sorting criteria
+     */
+    private _fetchCustomers(params?: any) {
         this._customerService.load(params)
             .finally(() => {
                 this._isLoading = false
@@ -245,14 +233,12 @@ export class CustomerListComponent implements OnInit {
                 this._customers = new ObservableArray(customers);
                 this._isLoading = false;
             }, (error) => {
-                console.log("In onPullToRefreshInitiated() Error section: " + error);
+                console.log("In _fetchCustomers() Error section: " + error);
                 if (error && error.message) {
                     alert("Error: \n" + error.message);
                 } else {
                     alert("Error reading records.");
                 }
             });
-        var listView = args.object;
-        listView.notifyPullToRefreshFinished();
     }
 }
