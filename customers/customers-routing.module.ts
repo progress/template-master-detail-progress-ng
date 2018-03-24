@@ -4,7 +4,7 @@ import { NativeScriptRouterModule } from "nativescript-angular/router";
 
 import { CustomerDetailEditComponent } from "./customer-detail-edit/customer-detail-edit.component";
 import { CustomerDetailComponent } from "./customer-detail/customer-detail.component";
-import { CustomerListComponent } from "./customer-list.component";
+import { CustomerListComponent } from "./customer-list/customer-list.component";
 
 const routes: Routes = [
     { path: "", component: CustomerListComponent },

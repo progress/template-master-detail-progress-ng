@@ -5,8 +5,23 @@ import { JsdoSettings } from "./jsdo.settings";
 import { Component, Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
-// All this class does is bridge the JSDOSession from the login page
-// to the NOT login page.
+/* *************************************************************************************
+ * The ProgressService provides access to Progress Data Object resources.
+ * It contains login and logout functionality.
+ *
+ * When login is performed:
+ *      - A progress.data.JSDOSession instance is created.
+ *      - The login is established.
+ *      - The specified Data Service catalog is loaded.
+ *
+ * After login, the progress.data.JSDOSession instance is then ready to support the creation
+ * of DataSources for any resource specified in the Data Service catalog.
+ *
+ * When logout is performed:
+ *      - The login session is terminated.
+ *      - The progress.data.JSDOSession instance is disabled, rendering it unable to start
+ *        a new login session.
+***************************************************************************************/
 
 @Injectable()
 export class ProgressService {

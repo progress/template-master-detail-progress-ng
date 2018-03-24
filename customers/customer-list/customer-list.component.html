@@ -1,0 +1,56 @@
+<ActionBar  class="action-bar">
+    <!-- Menu Button for Android -->
+    <NavigationButton 
+        *ngIf="isAndroid" 
+        icon="res://ic_menu_white_24dp"
+        (tap)="onDrawerButtonTap()">
+    </NavigationButton>
+
+    <!-- Menu Button for iOS -->
+    <ActionItem
+        (tap)="onDrawerButtonTap()"
+        *ngIf="isIOS"
+        ios.position="left">
+        <Image src="res://ic_menu_white"></Image>
+    </ActionItem>
+    
+    <Label class="action-bar-title" text="Customers" horizontalAlignment="center"></Label>
+    <ActionItem (tap)="onAddButtonTap()" ios.position="right" android.position="right" ios.systemIcon="4" 
+                    android.systemIcon="ic_menu_add"></ActionItem>    
+</ActionBar>
+
+<RadSideDrawer #drawer showOverNavigation="true" [drawerTransition]="sideDrawerTransition">
+    <!--
+    Use the tkDrawerContent directive to display the content of the app drawer on this page.
+    -->
+    <StackLayout tkDrawerContent>
+        <SideDrawer [selectedPage]="'Customers'" [sideDrawer]="drawerComponent"></SideDrawer>
+    </StackLayout>
+    
+    <!--
+    Use the tkMainContent directive to display the content of the page when you have an app drawer.
+    -->
+    <GridLayout rows="50, *" class="page page-content" tkMainContent>
+        <SearchBar hint="Search" row="0" [(ngModel)]="search" (ngModelChange)="onSearchChange($event)" (loaded)="onSearchBarLoaded($event)"></SearchBar>
+        <RadListView id="listView" [items]="customers" row="1" selectionBehavior="None"  pullToRefresh="true" (pullToRefreshInitiated)="onPullToRefreshInitiated($event)"
+        (itemSwipeProgressStarted)="onSwipeCellStarted($event)" (itemTap)="onCustomerItemTap($event)" swipeActions="true" class="list-group">
+        <!--
+        RadListView is a UI component part of the Progress NativeScript UI set of components.
+        Learn more about the RadListView UI component and how it can be customized in this documentation article:
+        http://docs.telerik.com/devtools/nativescript-ui/Controls/Angular/ListView/getting-started
+        This component is used to display the master list in the master-detail structure. 
+        -->
+            <ng-template tkListItemTemplate let-customer="item">
+                <StackLayout orientation="vertical" class="list-group-item">
+                        <Label [text]="customer.Name" class="list-group-item-content text-primary font-weight-bold"></Label>   
+                </StackLayout>
+            </ng-template>
+            <GridLayout *tkListItemSwipeTemplate columns="*, auto"  >
+                    <StackLayout id="delete-view" col="1" (tap)="onLeftSwipeClick($event)" orientation="horizontal" class="list-group-item-swipe" >
+                        <Label text="Delete"  class="list-group-item-swipe-content text-white" ></Label>
+                    </StackLayout>
+                </GridLayout>
+        </RadListView>
+    
+    </GridLayout>
+</RadSideDrawer>
