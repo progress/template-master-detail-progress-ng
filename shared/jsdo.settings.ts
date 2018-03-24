@@ -1,6 +1,6 @@
 export class JsdoSettings {
-    static serviceURI = "http://oemobiledemo.progress.com/OEMobileDemoServices";
-    static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServices/static/CustomerService.json";
+    static serviceURI = "https://oemobiledemo.progress.com/OEMobileDemoServices";
+    static catalogURI = "https://oemobiledemo.progress.com/OEMobileDemoServices/static/SportsService.json";
     static authenticationModel = "Anonymous";
     static resourceName = "Customer";
     static tableRef = "ttCustomer";
@@ -49,8 +49,8 @@ export class JsdoSettings {
 
 // BASIC JSDOSettings
 // export class JsdoSettings {
-//     static serviceURI = "http://oemobiledemo.progress.com/OEMobileDemoServicesBasic";
-//     static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServicesBasic/static/CustomerService.json";
+//     static serviceURI = "https://oemobiledemo.progress.com/OEMobileDemoServicesBasic";
+//     static catalogURI = "https://oemobiledemo.progress.com/OEMobileDemoServicesBasic/static/SportsService.json";
 //     static authenticationModel = "Basic";
 //     static resourceName = "Customer";
 //     static tableRef = "ttCustomer";
@@ -68,8 +68,8 @@ export class JsdoSettings {
 
 // FORM JSDOSettings
 // export class JsdoSettings {
-//     static serviceURI = "http://oemobiledemo.progress.com/OEMobileDemoServicesForm";
-//     static catalogURI = "http://oemobiledemo.progress.com/OEMobileDemoServicesForm/static/CustomerService.json";
+//     static serviceURI = "https://oemobiledemo.progress.com/OEMobileDemoServicesForm";
+//     static catalogURI = "https://oemobiledemo.progress.com/OEMobileDemoServicesForm/static/SportsService.json";
 //     static authenticationModel = "Form";
 //     static resourceName = "Customer";
 //     static tableRef = "ttCustomer";

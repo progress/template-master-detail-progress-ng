@@ -4,7 +4,7 @@ import {NativeScriptFormsModule} from "nativescript-angular/forms"
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
-import { LoginComponent } from "./pages/login/login.component";
+import { LoginComponent } from "./login/login.component";
 
 import { ProgressService } from "./shared/progress.service";
 import { LoginGuard } from "./shared/login-guard.service";

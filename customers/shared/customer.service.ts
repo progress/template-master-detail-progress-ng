@@ -10,10 +10,12 @@ import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { ProgressService } from "../../shared/progress.service";
 
-/* ***********************************************************
-* This is the master detail data service. It handles all the data operations
-* of retrieving and updating the data. In this case, it is connected to a Progress Data Service and
-*************************************************************/
+/* *************************************************************************************
+ * The CustomerService handles all the data operations of retrieving and updating
+ * customer data.
+ *
+ * It relies upon a ProgressService so it can create a DataSource for the customer data.
+***************************************************************************************/
 @Injectable()
 export class CustomerService {
 
@@ -144,10 +146,9 @@ export class CustomerService {
         promise = new Promise(
             (resolve, reject) => {
                 // Call dataSource.saveChanges() to send any pending changes to backend
-                this.dataSource.saveChanges()
-                    .then((result) => {
-                        resolve(result);
-                    }).catch((errors) => {
+                this.dataSource.saveChanges().subscribe(()=>{
+                    resolve();
+                }, (errors) => {
                         let errorMsg: string = "SaveChanges failed..";
 
                         if (errors) {
