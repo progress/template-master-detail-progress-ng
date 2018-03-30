@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
 import { ObservableArray } from "data/observable-array";
 import { RouterExtensions } from "nativescript-angular/router";
-import { ListViewEventData } from "nativescript-pro-ui/listview";
+import { ListViewEventData, ListViewLinearLayout, RadListView } from "nativescript-pro-ui/listview";
 import { DrawerTransitionBase, SlideInOnTopTransition } from "nativescript-pro-ui/sidedrawer";
 import { RadSideDrawerComponent } from "nativescript-pro-ui/sidedrawer/angular";
 import { isAndroid, isIOS } from "platform";
@@ -11,6 +11,7 @@ import { alert, confirm } from "tns-core-modules/ui/dialogs";
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { Customer } from "../shared/customer.model";
 import { CustomerService } from "../shared/customer.service";
+import { progress } from "@progress/jsdo-core";
 
 const SEARCH_DELAY = 300;
 
@@ -29,6 +30,11 @@ export class CustomerListComponent implements OnInit {
     @ViewChild("drawer") drawerComponent: RadSideDrawerComponent;
 
     search: string;
+    scrollCount = 0;   // This keeps track of number of times user performed scrolling
+    // This would allow us to calculate number of records loaded at client side
+    _recCount = 0;
+    _skipRec: number;
+    _pullToRefreshCount = 0;    // We use this to keep track of howmany times refresh performed
 
     private _isLoading: boolean = false;
     private _customers: ObservableArray<Customer> = new ObservableArray<Customer>([]);
@@ -39,7 +45,8 @@ export class CustomerListComponent implements OnInit {
 
     constructor(
         private _customerService: CustomerService,
-        private _routerExtensions: RouterExtensions
+        private _routerExtensions: RouterExtensions,
+        private _changeDetectionRef: ChangeDetectorRef
     ) {
     }
 
@@ -199,7 +206,7 @@ export class CustomerListComponent implements OnInit {
             event.object.android.clearFocus();
         }
     }
-    
+
     /**
      * This gets triggered when refresh (Pull down) operation is performed in the Listview
      * in mobile app. As part of this we perform a read() operation with same filter criteria
@@ -207,26 +214,95 @@ export class CustomerListComponent implements OnInit {
      * @param args - ListViewEventData
      */
     onPullToRefreshInitiated(args: ListViewEventData) {
-        console.log("In onPullToRefreshInitiated()");
+        // console.log("In onPullToRefreshInitiated()");
 
         // Check for the value of ngModel's search value. If it is set then perform the read based on search criteria
-        // If this no set, the read customer information from server via Data Service directly
+        // If this not set, then read customer information from server via Data Service directly
         if (this.search === undefined) {
             // We want to use the same filter criteria while refreshing the listview
             const params = {
                 filter: JsdoSettings.filter,
-                sort: JsdoSettings.sort
+                sort: JsdoSettings.sort,
+                top: JsdoSettings.pageSize,
+                skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize)
+                // mergeMode: JsdoSettings.mergeMode    // We dont need to use mergeMode in case of refreshing
+                // In this scenario we want to fetch list based on original filter criteria only
             };
 
             this._fetchCustomers(params);
         } else {
             this.onSearchChange();
         }
-        
+
         var listView = args.object;
         listView.notifyPullToRefreshFinished();
+        this._pullToRefreshCount = this._pullToRefreshCount + 1;
+        this._skipRec = 0; // Reset the skiplist once a refresh is performed
     }
 
+
+    /**
+     * Gets triggered when performing 'incremental scrolling' of data in the mobile screen.
+     * This method is responsible for fetching more records from backend
+     * @param args ListViewEventData
+     */
+    onLoadMoreItemsRequested(args: ListViewEventData) {
+        // console.log("DEBUG: In onLoadMoreItemsRequested()");
+        let customerListComponentRef = this;
+        var that = new WeakRef(this);
+        this.scrollCount = this.scrollCount + 1;
+
+        // Build a params object which then can be passed to DataSource        
+        const params = {
+            filter: JsdoSettings.filter,
+            sort: JsdoSettings.sort,
+            top: JsdoSettings.pageSize,
+            skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize),
+            pageSize: JsdoSettings.pageSize,
+            maxRecCount: JsdoSettings.maxRecCount,
+            mergeMode: progress.data.JSDO.MODE_MERGE    // Default value is set to MODE_MERGE for 'Incremental Scrolling'
+        };
+
+        if (!this._skipRec) {
+            this._skipRec = params.skip
+        }
+
+        // Let's modify/increment the skip value considering a read() hasbeen performed
+        // by the Incremental Scrolling functionality. 
+        params.skip = this._skipRec + params.pageSize;
+        this._skipRec = params.skip;
+
+        if (this._recCount) {
+            this._recCount = this._customers.length;
+        }
+
+        // If max record count is available/specified in the settings or if the number of records loaded in client reaches to max count then send an alert
+        if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) == params.maxRecCount) && (this._recCount) == (params.maxRecCount))) {
+            alert("Reached max size. Increase limit.");
+        } else {
+
+            var listView: RadListView = args.object;
+            customerListComponentRef._customerService.load(params)
+                .finally(() => {
+                    customerListComponentRef._isLoading = false
+                })
+                .subscribe((customers: Array<Customer>) => {
+                    customerListComponentRef._customers = new ObservableArray(customers);
+                    customerListComponentRef._isLoading = false;
+                    var listView = args.object;
+                    listView.notifyLoadOnDemandFinished();
+                }, (error) => {
+                    // console.log("DEBUG, in onLoadMoreItemsRequested() Error section: " + error);
+                    if (error && error.message) {
+                        alert("Error: \n" + error.message);
+                    } else {
+                        alert("Error reading records - onLoadMoreItemsRequested() section");
+                    }
+                });
+            args.returnValue = true;
+            // listView.scrollToIndex(this._customers.length - params.pageSize);            
+        }
+    }
     /**
      * This function is responsible for fetching customers remotely via 
      * Progress Data Service

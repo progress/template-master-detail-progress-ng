@@ -51,7 +51,10 @@ export class CustomerService {
                     jsdo: this.jsdo,
                     tableRef: JsdoSettings.tableRef,
                     filter: JsdoSettings.filter,
-                    sort: JsdoSettings.sort
+                    sort: JsdoSettings.sort,
+                    top: JsdoSettings.pageSize,
+                    skip: ((JsdoSettings.pageNumber)-1)*(JsdoSettings.pageSize),
+                    pageSize: JsdoSettings.pageSize
                 });
 
                 successFn();

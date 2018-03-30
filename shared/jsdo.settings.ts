@@ -31,9 +31,14 @@ export class JsdoSettings {
     // static filter = "CustNum <= 11";
     // static sort = "";
 
-    static filter = { field: "CustNum", operator: "lte", value: 11 };
-    static sort = { field: "Name", dir: "asc" };
+    static filter = { field: "CustNum", operator: "lte", value: 100 };
+    static sort = { field: "CustNum", dir: "asc" };
+    static pageNumber = 1;      // Specifies a page to start with
+    static pageSize = 10;        // Depicts number of records to be fetched per page
+    static maxRecCount = 1000;    // Depicts the max number of records that can be loaded in client at any time
+    // If the maxRecCount is set to undefined there is no max limit check.
 
+        
     // Filter expression used by the SearchBar field
     // $SEARCH token is replaced by the value entered in the field
     // static searchFilter = "CustNum <= 11 AND Name MATCHES '*$SEARCH*'";
