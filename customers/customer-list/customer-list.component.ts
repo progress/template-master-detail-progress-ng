@@ -229,13 +229,19 @@ export class CustomerListComponent implements OnInit {
                 // In this scenario we want to fetch list based on original filter criteria only
             };
 
-            this._fetchCustomers(params);
+            if (this.timer) {
+                clearTimeout(this.timer);
+            }
+            this.timer = setTimeout(() => {
+                this._fetchCustomers(params);
+                var listView = args.object;
+                listView.notifyPullToRefreshFinished();
+            }, 50);
+
         } else {
             this.onSearchChange();
         }
 
-        var listView = args.object;
-        listView.notifyPullToRefreshFinished();
         this._pullToRefreshCount = this._pullToRefreshCount + 1;
         this._skipRec = 0; // Reset the skiplist once a refresh is performed
     }
