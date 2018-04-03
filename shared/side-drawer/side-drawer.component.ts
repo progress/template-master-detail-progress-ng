@@ -80,19 +80,14 @@ export class SideDrawerComponent implements OnInit {
     }
 
     onLogout(): void {
-        confirm("Are you sure you want to log out?")
-            .then((result) => {
-                if (result) {
-                    return this.progressService.logout()
-                        .then(() => {
-                            this.routerExtensions.navigate(["/login"], {
-                                clearHistory: true,
-                                transition: {
-                                    name: "fade"
-                                }
-                            });
-                        });
-                }
+        this.progressService.logout()
+            .then(() => {
+                this.routerExtensions.navigate(["/login"], {
+                    clearHistory: true,
+                    transition: {
+                        name: "fade"
+                    }
+                });
             });
     }
 
