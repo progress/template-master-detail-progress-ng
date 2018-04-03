@@ -277,11 +277,9 @@ export class CustomerListComponent implements OnInit {
         // by the Incremental Scrolling functionality. 
         params.skip = this._skipRec + params.pageSize;
         this._skipRec = params.skip;
-
-        if (this._recCount) {
-            this._recCount = this._customers.length;
-        }
-
+        
+        this._recCount = this._customers.length;
+        
         // If max record count is available/specified in the settings or if the number of records loaded in client reaches to max count then send an alert
         if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) == params.maxRecCount) && (this._recCount) == (params.maxRecCount))) {
             alert("Reached max size. Increase limit.");
