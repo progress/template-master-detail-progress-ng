@@ -34,7 +34,7 @@ export class JsdoSettings {
     static filter = { field: "CustNum", operator: "lte", value: 100 };
     static sort = { field: "CustNum", dir: "asc" };
     static pageNumber = 1;      // Specifies a page to start with
-    static pageSize = 10;        // Depicts number of records to be fetched per page
+    static pageSize = 25;        // Depicts number of records to be fetched per page
     static maxRecCount = 1000;    // Depicts the max number of records that can be loaded in client at any time
     // If the maxRecCount is set to undefined there is no max limit check.
 
