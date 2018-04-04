@@ -12,6 +12,7 @@ The following authentication modes can be used:
 * Basic authentication
 * Form-based authentication
 
+
 ## Quick Start
 Execute the following command to create an app from this template:
 
