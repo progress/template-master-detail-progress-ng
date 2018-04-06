@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { RouterExtensions } from "nativescript-angular/router";
-import { RadSideDrawerComponent } from "nativescript-pro-ui/sidedrawer/angular";
+import { RadSideDrawerComponent } from "nativescript-ui-sidedrawer/angular";
 import { ItemEventData } from "ui/list-view";
 
 import { navigationCancelingError } from "@angular/router/src/shared";

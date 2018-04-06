@@ -42,9 +42,10 @@
         "base-64": "^0.1.0",
         "nativescript-angular": "~5.1.0",
         "nativescript-imagepicker": "~4.0.1",
-        "nativescript-localstorage": "^1.1.5",
-        "nativescript-pro-ui": "~3.3.0",
+        "nativescript-localstorage": "^1.1.5",        
         "nativescript-theme-core": "~1.0.4",
+        "nativescript-ui-listview": "^3.5.4",
+        "nativescript-ui-sidedrawer": "^3.5.2",
         "reflect-metadata": "~0.1.10",
         "tns-core-modules": "~3.4.0",
         "zone.js": "~0.8.18"
