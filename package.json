@@ -41,7 +41,7 @@
         "@progress/jsdo-nativescript": "^5.0.0",
         "base-64": "^0.1.0",
         "nativescript-angular": "~5.1.0",
-        "nativescript-imagepicker": "~4.0.1",
+        "nativescript-imagepicker": "~5.0.2",
         "nativescript-localstorage": "^1.1.5",        
         "nativescript-theme-core": "~1.0.4",
         "nativescript-ui-listview": "^3.5.4",
