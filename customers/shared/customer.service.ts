@@ -151,24 +151,9 @@ export class CustomerService {
                 // Call dataSource.saveChanges() to send any pending changes to backend
                 this.dataSource.saveChanges().subscribe(()=>{
                     resolve();
-                }, (errors) => {
-                        let errorMsg: string = "SaveChanges failed..";
-
-                        if (errors) {
-                            if (typeof errors === "string") {
-                                errorMsg = errors;
-                            } else if (Array.isArray(errors)) {
-                                // This would occur when error info returned from jsdo.getErrors()
-                                // For now, only one error message should be returned since app is processing
-                                // single row changes
-                                errors.forEach((err) => {
-                                    errorMsg = err.error;
-                                });
-                            }
-                        }
-
-                        reject(new Error(errorMsg));
-                    });
+                }, (error) => {
+                    reject(error);
+                });
             }
         );
 
