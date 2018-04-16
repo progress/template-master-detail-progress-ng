@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { ObservableArray } from "data/observable-array";
 import { RouterExtensions } from "nativescript-angular/router";
 import { ListViewEventData, ListViewLinearLayout, RadListView } from "nativescript-ui-listview";
@@ -6,12 +6,13 @@ import { DrawerTransitionBase, SlideInOnTopTransition } from "nativescript-ui-si
 import { RadSideDrawerComponent } from "nativescript-ui-sidedrawer/angular";
 import { isAndroid, isIOS } from "platform";
 
+import { progress } from "@progress/jsdo-core";
 import { EventData, View } from "tns-core-modules/ui/core/view/view";
 import { alert, confirm } from "tns-core-modules/ui/dialogs";
 import { JsdoSettings } from "../../shared/jsdo.settings";
+import { ProgressService } from "../../shared/progress.service";
 import { Customer } from "../shared/customer.model";
 import { CustomerService } from "../shared/customer.service";
-import { progress } from "@progress/jsdo-core";
 
 const SEARCH_DELAY = 300;
 
@@ -46,7 +47,8 @@ export class CustomerListComponent implements OnInit {
     constructor(
         private _customerService: CustomerService,
         private _routerExtensions: RouterExtensions,
-        private _changeDetectionRef: ChangeDetectorRef
+        private _changeDetectionRef: ChangeDetectorRef,
+        private _progressService: ProgressService
     ) {
     }
 
@@ -234,7 +236,7 @@ export class CustomerListComponent implements OnInit {
             }
             this.timer = setTimeout(() => {
                 this._fetchCustomers(params);
-                var listView = args.object;
+                const listView = args.object;
                 listView.notifyPullToRefreshFinished();
             }, 50);
 
@@ -246,7 +248,6 @@ export class CustomerListComponent implements OnInit {
         this._skipRec = 0; // Reset the skiplist once a refresh is performed
     }
 
-
     /**
      * Gets triggered when performing 'incremental scrolling' of data in the mobile screen.
      * This method is responsible for fetching more records from backend
@@ -254,11 +255,11 @@ export class CustomerListComponent implements OnInit {
      */
     onLoadMoreItemsRequested(args: ListViewEventData) {
         // console.log("DEBUG: In onLoadMoreItemsRequested()");
-        let customerListComponentRef = this;
-        var that = new WeakRef(this);
+        const customerListComponentRef = this;
+        const that = new WeakRef(this);
         this.scrollCount = this.scrollCount + 1;
 
-        // Build a params object which then can be passed to DataSource        
+        // Build a params object which then can be passed to DataSource
         const params = {
             filter: JsdoSettings.filter,
             sort: JsdoSettings.sort,
@@ -266,35 +267,38 @@ export class CustomerListComponent implements OnInit {
             skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize),
             pageSize: JsdoSettings.pageSize,
             maxRecCount: JsdoSettings.maxRecCount,
-            mergeMode: progress.data.JSDO.MODE_MERGE    // Default value is set to MODE_MERGE for 'Incremental Scrolling'
+            // Default value is set to MODE_MERGE for 'Incremental Scrolling'
+            mergeMode: progress.data.JSDO.MODE_MERGE
         };
 
         if (!this._skipRec) {
-            this._skipRec = params.skip
+            this._skipRec = params.skip;
         }
 
         // Let's modify/increment the skip value considering a read() hasbeen performed
-        // by the Incremental Scrolling functionality. 
+        // by the Incremental Scrolling functionality.
         params.skip = this._skipRec + params.pageSize;
         this._skipRec = params.skip;
-        
+
         this._recCount = this._customers.length;
-        
-        // If max record count is available/specified in the settings or if the number of records loaded in client reaches to max count then send an alert
-        if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) == params.maxRecCount) && (this._recCount) == (params.maxRecCount))) {
+
+        // If max record count is available/specified in the settings or if the number of records
+        //  loaded in client reaches to max count then send an alert
+        if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount) 
+            && (this._recCount) === (params.maxRecCount))) {
             alert("Reached max size. Increase limit.");
         } else {
 
-            var listView: RadListView = args.object;
+            const listView: RadListView = args.object;
             customerListComponentRef._customerService.load(params)
                 .finally(() => {
-                    customerListComponentRef._isLoading = false
+                    customerListComponentRef._isLoading = false;
                 })
                 .subscribe((customers: Array<Customer>) => {
                     customerListComponentRef._customers = new ObservableArray(customers);
                     customerListComponentRef._isLoading = false;
-                    var listView = args.object;
-                    listView.notifyLoadOnDemandFinished();
+
+                    args.object.notifyLoadOnDemandFinished();
                 }, (error) => {
                     // console.log("DEBUG, in onLoadMoreItemsRequested() Error section: " + error);
                     if (error && error.message) {
@@ -304,11 +308,26 @@ export class CustomerListComponent implements OnInit {
                     }
                 });
             args.returnValue = true;
-            // listView.scrollToIndex(this._customers.length - params.pageSize);            
+            // listView.scrollToIndex(this._customers.length - params.pageSize);
         }
     }
+
+    // This function cleans out our current session and brings us back to the
+    // login page. This is usually called after session expiration.
+    private reauthorize() {
+        this._progressService.logout()
+            .then(() => {
+                this._routerExtensions.navigate(["/login"], {
+                    clearHistory: true,
+                    transition: {
+                        name: "fade"
+                    }
+                });
+            });
+    }
+
     /**
-     * This function is responsible for fetching customers remotely via 
+     * This function is responsible for fetching customers remotely via
      * Progress Data Service
      * @param params - A parameter object which includes filtering and
      * sorting criteria
@@ -316,18 +335,26 @@ export class CustomerListComponent implements OnInit {
     private _fetchCustomers(params?: any) {
         this._customerService.load(params)
             .finally(() => {
-                this._isLoading = false
+                this._isLoading = false;
             })
             .subscribe((customers: Array<Customer>) => {
                 this._customers = new ObservableArray(customers);
                 this._isLoading = false;
             }, (error) => {
-                console.log("In _fetchCustomers() Error section: " + error);
-                if (error && error.message) {
-                    alert("Error: \n" + error.message);
+                // If we're unauthorized, we need to re-login.
+                // Otherwise, we display the error
+                if (error.toString() === "Error: Error reading records: Error: HTTP Status 401 Unauthorized") {
+                    alert("Your session has expired. Please log in to continue.");
+                    this.reauthorize();
                 } else {
-                    alert("Error reading records.");
+                    console.log("In _fetchCustomers() Error section: " + error);
+                    if (error && error.message) {
+                        alert("Error: \n" + error.message);
+                    } else {
+                        alert("Error reading records.");
+                    }
                 }
+
             });
     }
 }
