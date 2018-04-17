@@ -9,8 +9,8 @@ To help the rest of the community review your change, please follow the instruct
 
 ## PR Checklist
 
-- [ ] The PR title follows our guidelines: https://github.com/NativeScript/NativeScript/blob/master/CONTRIBUTING.md#commit-messages.
-- [ ] You have signed the [CLA](http://www.nativescript.org/cla).
+- [ ] The PR title follows our guidelines: https://github.com/progress/template-master-detail-progress-ng/blob/master/CONTRIBUTING.md#contribute-to-the-code-base.
+- [ ] You have signed the [CLA](https://www.progress.com/jsdo/cla).
 
 ## What is the current behavior?
 <!-- Please describe the current behavior that you are modifying, or link to a relevant issue. -->
