@@ -50,8 +50,6 @@ export class LoginComponent implements OnInit {
         try {
             this.progressService.login(this.username, this.password)
                 .then((result) => {
-                    console.log("Success on login()");
-
                     this._routerExtensions.navigate(["/customers"], { clearHistory: true });
                     this.isAuthenticating = false;
                 })
