@@ -3,9 +3,9 @@ Contribute to the JSDO Starter Template
 
 *Help us improve the JSDO Starter Template* 
 
-* [Report an Issue](#bug "Learn how to report an issue")
-* [Request a Feature](#request "Learn how to submit a feature or improvement request")
-* [Contribute to the Code Base](#contribute "Learn how to submit your own improvements to the code")
+* [Report an Issue](#report-an-issue "Learn how to report an issue")
+* [Request a Feature](#request-a-feature "Learn how to submit a feature or improvement request")
+* [Contribute to the Code Base](#contribute-to-the-code-base "Learn how to submit your own improvements to the code")
 
 Report an Issue
 ===
@@ -33,7 +33,7 @@ If you want to implement a new feature yourself, consider submitting it to the <
 Contribute to the Code Base
 ===
 Before you submit a Pull Request, consider the following guidelines.
-* Read and sign the <a href="https://docs.google.com/forms/d/e/1FAIpQLSe4hxgAUXwaRXLya67ZqDEz3TyNfryxz0_YnUKriXfNaa5Dxg/viewform">JSDO Contribution License Agreement</a>.
+* Read and sign the <a href="https://www.progress.com/jsdo/cla">JSDO Contribution License Agreement</a>.
 * Search <a href="https://github.com/progress/template-master-detail-progress-ng/pulls">GitHub</a> for an open or closed Pull Request that relates to your submission.
 * Clone the repository.
 ```bash
