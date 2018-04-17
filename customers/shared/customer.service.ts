@@ -28,7 +28,6 @@ export class CustomerService {
         // Basically, if a logout event is triggered by our progress service,
         // we clear out the data source. Because we're good people
         this._progressService.isLoggedin$.subscribe((isLoggedIn) => {
-            console.log("we got triggered: " + isLoggedIn);
             if (!isLoggedIn) {
                 this.dataSource = undefined;
             }
@@ -53,7 +52,7 @@ export class CustomerService {
                     filter: JsdoSettings.filter,
                     sort: JsdoSettings.sort,
                     top: JsdoSettings.pageSize,
-                    skip: ((JsdoSettings.pageNumber)-1)*(JsdoSettings.pageSize),
+                    skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize),
                     pageSize: JsdoSettings.pageSize
                 });
 
@@ -74,7 +73,12 @@ export class CustomerService {
                     this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
                         resolve(myData);
                     }, (error) => {
-                        reject(new Error("Error reading records: " + error.message));
+                        if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
+                            this._progressService.logout();
+                            reject(new Error("Your session is no longer valid. Please log in to continue."));
+                        } else {
+                            reject(new Error("Error reading records: " + error.message));
+                        }
                     });
                 });
 
@@ -88,7 +92,13 @@ export class CustomerService {
                     this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
                         resolve(myData);
                     }, (error) => {
-                        reject(new Error("Error reading records: " + error.message));
+                        if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
+                            this._progressService.logout();
+                            reject(new Error("Your session is no longer valid. Please log in to continue."));
+
+                        } else {
+                            reject(new Error("Error reading records: " + error.message));
+                        }
                     });
                 }, (error) => {
                     const message = (error && error.message) ? error.message : "Error reading records.";
@@ -143,16 +153,22 @@ export class CustomerService {
     hasEditSupport(): boolean {
         return this.dataSource.hasCUDSupport() || this.dataSource.hasSubmitSupport();
     }
+
     sync(): Promise<any> {
         let promise;
 
         promise = new Promise(
             (resolve, reject) => {
                 // Call dataSource.saveChanges() to send any pending changes to backend
-                this.dataSource.saveChanges().subscribe(()=>{
+                this.dataSource.saveChanges().subscribe(() => {
                     resolve();
                 }, (error) => {
-                    reject(error);
+                    if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
+                        this._progressService.logout();
+                        reject(new Error("Your session is no longer valid. Please log in to continue."));
+                    } else {
+                        reject(error);
+                    }
                 });
             }
         );

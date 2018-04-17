@@ -50,6 +50,16 @@ export class CustomerListComponent implements OnInit {
         private _changeDetectionRef: ChangeDetectorRef,
         private _progressService: ProgressService
     ) {
+        this._progressService.isLoggedin$.subscribe((isLoggedIn) => {
+            if (!isLoggedIn) {
+                this._routerExtensions.navigate(["/login"], {
+                    clearHistory: true,
+                    transition: {
+                        name: "fade"
+                    }
+                });
+            }
+        });
     }
 
     /* ***********************************************************
@@ -134,7 +144,6 @@ export class CustomerListComponent implements OnInit {
     }
 
     onLeftSwipeClick(args: ListViewEventData) {
-        // debugger;
         const customerItem = args.view.bindingContext;
         const customerName = customerItem.Name;
         const options = {
@@ -155,11 +164,14 @@ export class CustomerListComponent implements OnInit {
                             this._fetchCustomers();
                         }, (error) => {
                             // Delete was not successful, so let's back out the deletion
-                            this._customerService.cancelChanges();
                             if (error && error.message) {
                                 alert({ title: "Error", message: error.message, okButtonText: "Ok" });
                             } else {
                                 alert({ title: "Error", message: "Error deleting record.", okButtonText: "Ok" });
+                            }
+
+                            if (this._progressService.isLoggedIn()) {
+                                this._customerService.cancelChanges();
                             }
                         }).catch((e) => {
                             alert({ title: "Error", message: e.message, okButtonText: "Ok" });
@@ -312,20 +324,6 @@ export class CustomerListComponent implements OnInit {
         }
     }
 
-    // This function cleans out our current session and brings us back to the
-    // login page. This is usually called after session expiration.
-    private reauthorize() {
-        this._progressService.logout()
-            .then(() => {
-                this._routerExtensions.navigate(["/login"], {
-                    clearHistory: true,
-                    transition: {
-                        name: "fade"
-                    }
-                });
-            });
-    }
-
     /**
      * This function is responsible for fetching customers remotely via
      * Progress Data Service
@@ -343,18 +341,12 @@ export class CustomerListComponent implements OnInit {
             }, (error) => {
                 // If we're unauthorized, we need to re-login.
                 // Otherwise, we display the error
-                if (error.toString() === "Error: Error reading records: Error: HTTP Status 401 Unauthorized") {
-                    alert("Your session has expired. Please log in to continue.");
-                    this.reauthorize();
+                console.log("In _fetchCustomers() Error section: " + error);
+                if (error && error.message) {
+                    alert("Error: \n" + error.message);
                 } else {
-                    console.log("In _fetchCustomers() Error section: " + error);
-                    if (error && error.message) {
-                        alert("Error: \n" + error.message);
-                    } else {
-                        alert("Error reading records.");
-                    }
+                    alert("Error reading records.");
                 }
-
             });
     }
 }
