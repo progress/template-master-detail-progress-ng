@@ -227,8 +227,7 @@ export class CustomerListComponent implements OnInit {
      * such that all records are fetched again from server
      * @param args - ListViewEventData
      */
-    onPullToRefreshInitiated(args: ListViewEventData) {
-        // console.log("In onPullToRefreshInitiated()");
+    onPullToRefreshInitiated(args: ListViewEventData) {        
 
         // Check for the value of ngModel's search value. If it is set then perform the read based on search criteria
         // If this not set, then read customer information from server via Data Service directly
@@ -265,8 +264,7 @@ export class CustomerListComponent implements OnInit {
      * This method is responsible for fetching more records from backend
      * @param args ListViewEventData
      */
-    onLoadMoreItemsRequested(args: ListViewEventData) {
-        // console.log("DEBUG: In onLoadMoreItemsRequested()");
+    onLoadMoreItemsRequested(args: ListViewEventData) {        
         const customerListComponentRef = this;
         const that = new WeakRef(this);
         this.scrollCount = this.scrollCount + 1;
@@ -311,8 +309,7 @@ export class CustomerListComponent implements OnInit {
                     customerListComponentRef._isLoading = false;
 
                     args.object.notifyLoadOnDemandFinished();
-                }, (error) => {
-                    // console.log("DEBUG, in onLoadMoreItemsRequested() Error section: " + error);
+                }, (error) => {                    
                     if (error && error.message) {
                         alert("Error: \n" + error.message);
                     } else {
@@ -340,8 +337,7 @@ export class CustomerListComponent implements OnInit {
                 this._isLoading = false;
             }, (error) => {
                 // If we're unauthorized, we need to re-login.
-                // Otherwise, we display the error
-                console.log("In _fetchCustomers() Error section: " + error);
+                // Otherwise, we display the error                
                 if (error && error.message) {
                     alert("Error: \n" + error.message);
                 } else {

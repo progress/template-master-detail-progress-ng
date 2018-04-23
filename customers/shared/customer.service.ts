@@ -57,8 +57,7 @@ export class CustomerService {
                 });
 
                 successFn();
-            } catch (e) {
-                // console.log("DEBUG: " + e);
+            } catch (e) {                
                 errorFn();
                 throw new Error("Error: " + e.message);
             }
