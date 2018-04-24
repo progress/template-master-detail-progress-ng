@@ -251,7 +251,7 @@ export class CustomerDetailEditComponent implements OnInit {
             // Want to initialize ListPicker to current customer's state
             const stateIndex = this._stateList.indexOf(this._customer.State);
             this.stateIndexValue = (stateIndex >= 0) ? stateIndex : 0;
-        }, (error) => {
+        }, (error && error.message) => {
             console.log("Error: " + error.message);
         });
     }

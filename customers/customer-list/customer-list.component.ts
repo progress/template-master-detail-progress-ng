@@ -341,7 +341,7 @@ export class CustomerListComponent implements OnInit {
             }, (error) => {
                 // If we're unauthorized, we need to re-login.
                 // Otherwise, we display the error
-                console.log("In _fetchCustomers() Error section: " + error);
+                // console.log("In _fetchCustomers() Error section: " + error);
                 if (error && error.message) {
                     alert("Error: \n" + error.message);
                 } else {
