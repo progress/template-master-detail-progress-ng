@@ -5,8 +5,8 @@ import "rxjs/add/observable/fromPromise";
 import "rxjs/add/observable/of";
 import { Observable } from "rxjs/Observable";
 import { Customer } from "./customer.model";
-
 import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
+
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { ProgressService } from "../../shared/progress.service";
 
@@ -126,20 +126,6 @@ export class CustomerService {
         }
 
         return this.sync();
-    }
-
-    /**
-     * Accepts any pending changes from the underlying data source
-     */
-    acceptChanges(): void {
-        this.dataSource.acceptChanges();
-    }
-
-    /**
-     * Cancels any pending changes from the underlying data source
-     */
-    cancelChanges(): void {
-        this.dataSource.cancelChanges();
     }
 
     /**
