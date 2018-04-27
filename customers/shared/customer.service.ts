@@ -69,8 +69,8 @@ export class CustomerService {
         let promise;
         if (this.dataSource) {
                 promise = new Promise((resolve, reject) => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: any) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
@@ -85,8 +85,8 @@ export class CustomerService {
         } else {
             promise = new Promise((resolve, reject) => {
                 this.createDataSource(() => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: any) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
