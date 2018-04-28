@@ -69,7 +69,7 @@ export class CustomerService {
         let promise;
         if (this.dataSource) {
                 promise = new Promise((resolve, reject) => {
-                    this.dataSource.read(params).subscribe((myData: any) => {
+                    this.dataSource.read(params).subscribe((myData: progress.data.DataResult) => {
                         resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
@@ -85,7 +85,7 @@ export class CustomerService {
         } else {
             promise = new Promise((resolve, reject) => {
                 this.createDataSource(() => {
-                    this.dataSource.read(params).subscribe((myData: any) => {
+                    this.dataSource.read(params).subscribe((myData: progress.data.DataResult) => {
                         resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
