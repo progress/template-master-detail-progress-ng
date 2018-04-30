@@ -5,7 +5,7 @@ import "rxjs/add/observable/fromPromise";
 import "rxjs/add/observable/of";
 import { Observable } from "rxjs/Observable";
 import { Customer } from "./customer.model";
-import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
+import { DataSource, DataSourceOptions, DataResult } from "@progress/jsdo-nativescript";
 
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { ProgressService } from "../../shared/progress.service";
@@ -69,8 +69,8 @@ export class CustomerService {
         let promise;
         if (this.dataSource) {
                 promise = new Promise((resolve, reject) => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
@@ -85,8 +85,8 @@ export class CustomerService {
         } else {
             promise = new Promise((resolve, reject) => {
                 this.createDataSource(() => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
