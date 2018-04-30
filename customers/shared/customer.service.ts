@@ -68,6 +68,7 @@ export class CustomerService {
     load(params?: progress.data.FilterOptions): Observable<any> {
         let promise;
         if (this.dataSource) {
+            if (params) {
                 promise = new Promise((resolve, reject) => {
                     this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
                         resolve(myData);
@@ -82,6 +83,9 @@ export class CustomerService {
                 });
 
                 return Observable.fromPromise(promise).catch(this.handleErrors);
+            } else {
+                return Observable.of(this.dataSource.getData());
+            }
         } else {
             promise = new Promise((resolve, reject) => {
                 this.createDataSource(() => {
