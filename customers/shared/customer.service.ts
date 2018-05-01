@@ -5,8 +5,8 @@ import "rxjs/add/observable/fromPromise";
 import "rxjs/add/observable/of";
 import { Observable } from "rxjs/Observable";
 import { Customer } from "./customer.model";
+import { DataSource, DataSourceOptions, DataResult } from "@progress/jsdo-nativescript";
 
-import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { ProgressService } from "../../shared/progress.service";
 
@@ -70,8 +70,8 @@ export class CustomerService {
         if (this.dataSource) {
             if (params) {
                 promise = new Promise((resolve, reject) => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
@@ -89,8 +89,8 @@ export class CustomerService {
         } else {
             promise = new Promise((resolve, reject) => {
                 this.createDataSource(() => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
@@ -130,20 +130,6 @@ export class CustomerService {
         }
 
         return this.sync();
-    }
-
-    /**
-     * Accepts any pending changes from the underlying data source
-     */
-    acceptChanges(): void {
-        this.dataSource.acceptChanges();
-    }
-
-    /**
-     * Cancels any pending changes from the underlying data source
-     */
-    cancelChanges(): void {
-        this.dataSource.cancelChanges();
     }
 
     /**

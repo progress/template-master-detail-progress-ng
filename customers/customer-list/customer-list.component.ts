@@ -159,8 +159,6 @@ export class CustomerListComponent implements OnInit {
                 if (result) {
                     this._customerService.delete(customerItem)
                         .then((result1) => {
-                            // Delete was successful, so we can accept the changes
-                            this._customerService.acceptChanges();
                             this._fetchCustomers();
                         }, (error) => {
                             // Delete was not successful, so let's back out the deletion
@@ -168,10 +166,6 @@ export class CustomerListComponent implements OnInit {
                                 alert({ title: "Error", message: error.message, okButtonText: "Ok" });
                             } else {
                                 alert({ title: "Error", message: "Error deleting record.", okButtonText: "Ok" });
-                            }
-
-                            if (this._progressService.isLoggedIn()) {
-                                this._customerService.cancelChanges();
                             }
                         }).catch((e) => {
                             alert({ title: "Error", message: e.message, okButtonText: "Ok" });
@@ -341,7 +335,7 @@ export class CustomerListComponent implements OnInit {
             }, (error) => {
                 // If we're unauthorized, we need to re-login.
                 // Otherwise, we display the error
-                console.log("In _fetchCustomers() Error section: " + error);
+                // console.log("In _fetchCustomers() Error section: " + error);
                 if (error && error.message) {
                     alert("Error: \n" + error.message);
                 } else {
