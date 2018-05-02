@@ -52,8 +52,7 @@ export class CustomerService {
                     filter: JsdoSettings.filter,
                     sort: JsdoSettings.sort,
                     top: JsdoSettings.pageSize,
-                    skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize),
-                    pageSize: JsdoSettings.pageSize
+                    skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize)
                 });
 
                 successFn();
