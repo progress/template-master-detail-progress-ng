@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { ObservableArray } from "data/observable-array";
 import { RouterExtensions } from "nativescript-angular/router";
-import { ListViewEventData, ListViewLinearLayout, RadListView } from "nativescript-ui-listview";
+import { ListViewEventData, ListViewLinearLayout, RadListView, ListViewLoadOnDemandMode } from "nativescript-ui-listview";
 import { DrawerTransitionBase, SlideInOnTopTransition } from "nativescript-ui-sidedrawer";
 import { RadSideDrawerComponent } from "nativescript-ui-sidedrawer/angular";
 import { isAndroid, isIOS } from "platform";
@@ -240,6 +240,11 @@ export class CustomerListComponent implements OnInit {
             if (this.timer) {
                 clearTimeout(this.timer);
             }
+
+            if (args.object.loadOnDemandMode === "None") {
+                args.object.loadOnDemandMode = "Auto";
+            }
+
             this.timer = setTimeout(() => {
                 this._fetchCustomers(params);
                 const listView = args.object;
@@ -290,7 +295,7 @@ export class CustomerListComponent implements OnInit {
 
         // If max record count is available/specified in the settings or if the number of records
         //  loaded in client reaches to max count then send an alert
-        if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount) 
+        if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount)
             && (this._recCount) === (params.maxRecCount))) {
             alert("Reached max size. Increase limit.");
         } else {
@@ -303,6 +308,12 @@ export class CustomerListComponent implements OnInit {
                 .subscribe((customers: Array<Customer>) => {
                     customerListComponentRef._customers = new ObservableArray(customers);
                     customerListComponentRef._isLoading = false;
+
+                    // Setting the loadOnDemandMode to None if the last resultset from server is empty
+                    if (customerListComponentRef._customerService.dataSource._isLastResultSetEmpty) {
+                        listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
+                        customerListComponentRef._isLoading = false;
+                    }
 
                     args.object.notifyLoadOnDemandFinished();
                 }, (error) => {

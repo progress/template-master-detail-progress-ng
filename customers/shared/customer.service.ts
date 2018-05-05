@@ -19,8 +19,8 @@ import { ProgressService } from "../../shared/progress.service";
 @Injectable()
 export class CustomerService {
 
+    dataSource: DataSource;
     private jsdo: progress.data.JSDO;
-    private dataSource: DataSource;
     private jsdoSettings: JsdoSettings = new JsdoSettings();
 
     constructor(private _ngZone: NgZone,
