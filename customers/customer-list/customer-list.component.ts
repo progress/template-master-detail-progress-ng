@@ -1,7 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { ObservableArray } from "data/observable-array";
 import { RouterExtensions } from "nativescript-angular/router";
-import { ListViewEventData, ListViewLinearLayout, RadListView, ListViewLoadOnDemandMode } from "nativescript-ui-listview";
+// tslint:disable-next-line:max-line-length
+import { ListViewEventData, ListViewLinearLayout, ListViewLoadOnDemandMode, RadListView } from "nativescript-ui-listview";
 import { DrawerTransitionBase, SlideInOnTopTransition } from "nativescript-ui-sidedrawer";
 import { RadSideDrawerComponent } from "nativescript-ui-sidedrawer/angular";
 import { isAndroid, isIOS } from "platform";
@@ -180,6 +181,8 @@ export class CustomerListComponent implements OnInit {
 
     onSearchChange(args?: EventData) {
         let searchFilter: any = JsdoSettings.searchFilter;
+        let params;
+
         try {
             if (typeof (searchFilter) === "object") {
                 searchFilter = JSON.parse(
@@ -193,13 +196,20 @@ export class CustomerListComponent implements OnInit {
             searchFilter = "";
         }
 
-        const params = this.search.length === 0 ? {
-            filter: JsdoSettings.filter,
-            sort: JsdoSettings.sort
-        } : {
+        if (this.search.length === 0) {
+            params = {
+                filter: JsdoSettings.filter,
+                sort: JsdoSettings.sort,
+                top: JsdoSettings.pageSize,
+                skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize)
+            };
+            this._skipRec = 0; // Reset the skiplist if the search is cleared off
+        } else {
+            params = {
                 filter: searchFilter,
                 sort: { field: "Name", dir: "asc" }
             };
+        }
 
         if (this.timer) {
             clearTimeout(this.timer);
@@ -222,8 +232,7 @@ export class CustomerListComponent implements OnInit {
      * @param args - ListViewEventData
      */
     onPullToRefreshInitiated(args: ListViewEventData) {
-        // console.log("In onPullToRefreshInitiated()");
-
+        const listView: RadListView = args.object;
         // Check for the value of ngModel's search value. If it is set then perform the read based on search criteria
         // If this not set, then read customer information from server via Data Service directly
         if (this.search === undefined) {
@@ -240,19 +249,20 @@ export class CustomerListComponent implements OnInit {
             if (this.timer) {
                 clearTimeout(this.timer);
             }
-
+            // tslint:disable-next-line:max-line-length
             if (args.object.loadOnDemandMode === "None") {
-                args.object.loadOnDemandMode = "Auto";
+                this._skipRec = 0; // Because listView.locaOnDemandMode navigates to its function and makes read call
+                listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.Auto];
             }
 
             this.timer = setTimeout(() => {
                 this._fetchCustomers(params);
-                const listView = args.object;
                 listView.notifyPullToRefreshFinished();
             }, 50);
 
         } else {
             this.onSearchChange();
+            listView.notifyPullToRefreshFinished();
         }
 
         this._pullToRefreshCount = this._pullToRefreshCount + 1;
@@ -264,68 +274,70 @@ export class CustomerListComponent implements OnInit {
      * This method is responsible for fetching more records from backend
      * @param args ListViewEventData
      */
-    onLoadMoreItemsRequested(args: ListViewEventData) {
-        // console.log("DEBUG: In onLoadMoreItemsRequested()");
-        const customerListComponentRef = this;
-        const that = new WeakRef(this);
-        this.scrollCount = this.scrollCount + 1;
+    onLoadMoreItemsRequested = (args: ListViewEventData) => {
+        if (this.search === undefined || this.search.length === 0) {
 
-        // Build a params object which then can be passed to DataSource
-        const params = {
-            filter: JsdoSettings.filter,
-            sort: JsdoSettings.sort,
-            top: JsdoSettings.pageSize,
-            skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize),
-            pageSize: JsdoSettings.pageSize,
-            maxRecCount: JsdoSettings.maxRecCount,
-            // Default value is set to MODE_MERGE for 'Incremental Scrolling'
-            mergeMode: progress.data.JSDO.MODE_MERGE
-        };
+            this.scrollCount = this.scrollCount + 1;
 
-        if (!this._skipRec) {
+            // Build a params object which then can be passed to DataSource
+            const params = {
+                filter: JsdoSettings.filter,
+                sort: JsdoSettings.sort,
+                top: JsdoSettings.pageSize,
+                skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize),
+                pageSize: JsdoSettings.pageSize,
+                maxRecCount: JsdoSettings.maxRecCount,
+                // Default value is set to MODE_MERGE for 'Incremental Scrolling'
+                mergeMode: progress.data.JSDO.MODE_MERGE
+            };
+
+            if (!this._skipRec) {
+                this._skipRec = params.skip;
+            }
+
+            // Let's modify/increment the skip value considering a read() hasbeen performed
+            // by the Incremental Scrolling functionality.
+            params.skip = this._skipRec + params.pageSize;
             this._skipRec = params.skip;
-        }
 
-        // Let's modify/increment the skip value considering a read() hasbeen performed
-        // by the Incremental Scrolling functionality.
-        params.skip = this._skipRec + params.pageSize;
-        this._skipRec = params.skip;
+            this._recCount = this._customers.length;
 
-        this._recCount = this._customers.length;
+            // If max record count is available/specified in the settings or if the number of records
+            //  loaded in client reaches to max count then send an alert
+            if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount)
+                && (this._recCount) === (params.maxRecCount))) {
+                this._isLoading = false;
+                args.object.notifyLoadOnDemandFinished();
+                alert("Reached max size. Increase limit.");
+            } else {
 
-        // If max record count is available/specified in the settings or if the number of records
-        //  loaded in client reaches to max count then send an alert
-        if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount)
-            && (this._recCount) === (params.maxRecCount))) {
-            alert("Reached max size. Increase limit.");
+                const listView: RadListView = args.object;
+                this._customerService.load(params)
+                    .finally(() => {
+                        this._isLoading = false;
+                    })
+                    .subscribe((customers: Array<Customer>) => {
+                        this._customers = new ObservableArray(customers);
+                        this._isLoading = false;
+
+                        // Setting the loadOnDemandMode to None if the last resultset from server is empty
+                        if (this._customerService.dataSource._isLastResultSetEmpty) {
+                            listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
+                            this._isLoading = false;
+                        }
+
+                        args.object.notifyLoadOnDemandFinished();
+                    }, (error) => {
+                        if (error && error.message) {
+                            alert("Error: \n" + error.message);
+                        } else {
+                            alert("Error reading records - onLoadMoreItemsRequested() section");
+                        }
+                    });
+                args.returnValue = true;
+            }
         } else {
-
-            const listView: RadListView = args.object;
-            customerListComponentRef._customerService.load(params)
-                .finally(() => {
-                    customerListComponentRef._isLoading = false;
-                })
-                .subscribe((customers: Array<Customer>) => {
-                    customerListComponentRef._customers = new ObservableArray(customers);
-                    customerListComponentRef._isLoading = false;
-
-                    // Setting the loadOnDemandMode to None if the last resultset from server is empty
-                    if (customerListComponentRef._customerService.dataSource._isLastResultSetEmpty) {
-                        listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
-                        customerListComponentRef._isLoading = false;
-                    }
-
-                    args.object.notifyLoadOnDemandFinished();
-                }, (error) => {
-                    // console.log("DEBUG, in onLoadMoreItemsRequested() Error section: " + error);
-                    if (error && error.message) {
-                        alert("Error: \n" + error.message);
-                    } else {
-                        alert("Error reading records - onLoadMoreItemsRequested() section");
-                    }
-                });
-            args.returnValue = true;
-            // listView.scrollToIndex(this._customers.length - params.pageSize);
+            args.object.notifyLoadOnDemandFinished();
         }
     }
 
@@ -346,7 +358,6 @@ export class CustomerListComponent implements OnInit {
             }, (error) => {
                 // If we're unauthorized, we need to re-login.
                 // Otherwise, we display the error
-                // console.log("In _fetchCustomers() Error section: " + error);
                 if (error && error.message) {
                     alert("Error: \n" + error.message);
                 } else {

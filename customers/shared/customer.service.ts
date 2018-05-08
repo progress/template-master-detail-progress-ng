@@ -5,8 +5,8 @@ import "rxjs/add/observable/fromPromise";
 import "rxjs/add/observable/of";
 import { Observable } from "rxjs/Observable";
 import { Customer } from "./customer.model";
-import { DataSource, DataSourceOptions, DataResult } from "@progress/jsdo-nativescript";
 
+import { DataResult, DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { ProgressService } from "../../shared/progress.service";
 
