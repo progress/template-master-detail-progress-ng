@@ -162,7 +162,11 @@ export class CustomerListComponent implements OnInit {
                 if (result) {
                     this._customerService.delete(customerItem)
                         .then((result1) => {
-                            this._fetchCustomers();
+                            this._customers.forEach((item) => {
+                                if (item.CustNum === customerItem.CustNum) {
+                                    this._customers.splice(this._customers.indexOf(item), 1);
+                                }
+                            });
                         }, (error) => {
                             // Delete was not successful, so let's back out the deletion
                             if (error && error.message) {
