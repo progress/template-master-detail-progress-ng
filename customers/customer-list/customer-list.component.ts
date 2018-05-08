@@ -251,7 +251,7 @@ export class CustomerListComponent implements OnInit {
             }
             // tslint:disable-next-line:max-line-length
             if (args.object.loadOnDemandMode === "None") {
-                this._skipRec = 0; // Because listView.locaOnDemandMode navigates to its function and makes read call
+                this._skipRec = 0; // Because listView.loadOnDemandMode navigates to its function and makes read call
                 listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.Auto];
             }
 
