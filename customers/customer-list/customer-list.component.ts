@@ -1,8 +1,10 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { ObservableArray } from "data/observable-array";
 import { RouterExtensions } from "nativescript-angular/router";
-// tslint:disable-next-line:max-line-length
-import { ListViewEventData, ListViewLinearLayout, ListViewLoadOnDemandMode, RadListView } from "nativescript-ui-listview";
+import {
+    ListViewEventData, ListViewLinearLayout, ListViewLoadOnDemandMode,
+    RadListView
+} from "nativescript-ui-listview";
 import { DrawerTransitionBase, SlideInOnTopTransition } from "nativescript-ui-sidedrawer";
 import { RadSideDrawerComponent } from "nativescript-ui-sidedrawer/angular";
 import { isAndroid, isIOS } from "platform";
@@ -249,8 +251,7 @@ export class CustomerListComponent implements OnInit {
             if (this.timer) {
                 clearTimeout(this.timer);
             }
-            // tslint:disable-next-line:max-line-length
-            if (args.object.loadOnDemandMode === "None") {
+            if (args.object.loadOnDemandMode === ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None]) {
                 this._skipRec = 0; // Because listView.loadOnDemandMode navigates to its function and makes read call
                 listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.Auto];
             }
@@ -274,7 +275,7 @@ export class CustomerListComponent implements OnInit {
      * This method is responsible for fetching more records from backend
      * @param args ListViewEventData
      */
-    onLoadMoreItemsRequested = (args: ListViewEventData) => {
+    onLoadMoreItemsRequested(args: ListViewEventData) {
         if (this.search === undefined || this.search.length === 0) {
 
             this.scrollCount = this.scrollCount + 1;
