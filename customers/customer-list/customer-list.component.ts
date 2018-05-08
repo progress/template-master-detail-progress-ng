@@ -262,6 +262,7 @@ export class CustomerListComponent implements OnInit {
     onLoadMoreItemsRequested(args: ListViewEventData) {
         // console.log("DEBUG: In onLoadMoreItemsRequested()");
         const customerListComponentRef = this;
+        const that = new WeakRef(this);
         this.scrollCount = this.scrollCount + 1;
 
         // Build a params object which then can be passed to DataSource
@@ -300,8 +301,7 @@ export class CustomerListComponent implements OnInit {
                     customerListComponentRef._isLoading = false;
                 })
                 .subscribe((customers: Array<Customer>) => {
-                    customers.splice(0, customerListComponentRef._customers.length);
-                    customerListComponentRef._customers.push(customers);
+                    customerListComponentRef._customers = new ObservableArray(customers);
                     customerListComponentRef._isLoading = false;
 
                     args.object.notifyLoadOnDemandFinished();
