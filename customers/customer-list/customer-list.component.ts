@@ -322,7 +322,7 @@ export class CustomerListComponent implements OnInit {
                         this._isLoading = false;
                     })
                     .subscribe((customers: Array<Customer>) => {
-                        customers.splice(0, this._customers.length);	
+                        customers.splice(0, this._customers.length);
                         this._customers.push(customers);
                         this._isLoading = false;
 
