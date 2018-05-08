@@ -318,7 +318,8 @@ export class CustomerListComponent implements OnInit {
                         this._isLoading = false;
                     })
                     .subscribe((customers: Array<Customer>) => {
-                        this._customers = new ObservableArray(customers);
+                        customers.splice(0, this._customers.length);	
+                        this._customers.push(customers);
                         this._isLoading = false;
 
                         // Setting the loadOnDemandMode to None if the last resultset from server is empty
