@@ -6,7 +6,7 @@ import "rxjs/add/observable/of";
 import { Observable } from "rxjs/Observable";
 import { Customer } from "./customer.model";
 
-import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
+import { DataResult, DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { ProgressService } from "../../shared/progress.service";
 
@@ -19,8 +19,8 @@ import { ProgressService } from "../../shared/progress.service";
 @Injectable()
 export class CustomerService {
 
+    dataSource: DataSource;
     private jsdo: progress.data.JSDO;
-    private dataSource: DataSource;
     private jsdoSettings: JsdoSettings = new JsdoSettings();
 
     constructor(private _ngZone: NgZone,
@@ -52,8 +52,7 @@ export class CustomerService {
                     filter: JsdoSettings.filter,
                     sort: JsdoSettings.sort,
                     top: JsdoSettings.pageSize,
-                    skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize),
-                    pageSize: JsdoSettings.pageSize
+                    skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize)
                 });
 
                 successFn();
@@ -70,8 +69,8 @@ export class CustomerService {
         if (this.dataSource) {
             if (params) {
                 promise = new Promise((resolve, reject) => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
@@ -89,8 +88,8 @@ export class CustomerService {
         } else {
             promise = new Promise((resolve, reject) => {
                 this.createDataSource(() => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
@@ -130,20 +129,6 @@ export class CustomerService {
         }
 
         return this.sync();
-    }
-
-    /**
-     * Accepts any pending changes from the underlying data source
-     */
-    acceptChanges(): void {
-        this.dataSource.acceptChanges();
-    }
-
-    /**
-     * Cancels any pending changes from the underlying data source
-     */
-    cancelChanges(): void {
-        this.dataSource.cancelChanges();
     }
 
     /**

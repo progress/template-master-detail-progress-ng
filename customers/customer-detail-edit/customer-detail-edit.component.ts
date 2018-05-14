@@ -120,9 +120,6 @@ export class CustomerDetailEditComponent implements OnInit {
      *  - the list page for a create
     *************************************************************/
     onCancelButtonTap(): void {
-        // Remove new record or updates to record from client memory
-        this._customerService.cancelChanges();
-        
         if (this._addMode) {
             this._routerExtensions.navigate(["/customers"], {
                 clearHistory: true,
@@ -156,7 +153,6 @@ export class CustomerDetailEditComponent implements OnInit {
     }
     successOnDone(result): void {
         this._isBusy = false;
-        this._customerService.acceptChanges();
 
         this._routerExtensions.navigate(["/customers"], {
             clearHistory: true,
@@ -200,7 +196,6 @@ export class CustomerDetailEditComponent implements OnInit {
 
                         this._customerService.delete(customerItem)
                             .then((result1) => {
-                                this._customerService.acceptChanges();
                                 this._isBusy = false;
                                 this._routerExtensions.navigate(["/customers"], {
                                     clearHistory: true,
@@ -212,7 +207,6 @@ export class CustomerDetailEditComponent implements OnInit {
                                     }
                                 });
                             }, (error) => {
-                                this._customerService.cancelChanges();
                                 this._isBusy = false;
                                 if (error && error.message) {
                                     alert({ title: "Error", message: error.message, okButtonText: "Ok" });

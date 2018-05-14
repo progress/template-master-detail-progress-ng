@@ -9,7 +9,7 @@ import { ProgressService } from "../../shared/progress.service";
 
 import { State } from "./state.model";
 
-import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
+import { DataSource, DataSourceOptions, DataResult } from "@progress/jsdo-nativescript";
 
 /* *************************************************************************************
  * The StateService handles all the data operations of retrieving state data.
@@ -49,8 +49,8 @@ export class StateService {
           } else {
             const promise = new Promise((resolve, reject) => {
                 this.createDataSource(() => {
-                    this.dataSource.read().subscribe((myData: Array<State>) => {
-                        resolve(myData);
+                    this.dataSource.read().subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
                             this._progressService.logout();
