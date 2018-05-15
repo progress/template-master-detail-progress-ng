@@ -1,6 +1,6 @@
 {
     "name": "tns-template-master-detail-progress-ng",
-    "version": "5.0.0",
+    "version": "5.0.1",
     "displayName": "Master-Detail with Progress Data Service",
     "templateType": "App template",
     "main": "main.js",
