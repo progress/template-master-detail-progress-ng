@@ -1,12 +1,12 @@
 import { NgModule, NO_ERRORS_SCHEMA } from "@angular/core";
-import { NativeScriptModule } from "nativescript-angular/nativescript.module";
-import { NativeScriptUISideDrawerModule } from "nativescript-pro-ui/sidedrawer/angular";
+import { NativeScriptCommonModule } from "nativescript-angular/common";
+import { NativeScriptUISideDrawerModule } from "nativescript-ui-sidedrawer/angular";
 
 import { SideDrawerComponent } from "./side-drawer/side-drawer.component";
 
 @NgModule({
     imports: [
-        NativeScriptModule,
+        NativeScriptCommonModule,
         NativeScriptUISideDrawerModule
     ],
     declarations: [

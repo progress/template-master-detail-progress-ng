@@ -1,14 +1,19 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { ObservableArray } from "data/observable-array";
 import { RouterExtensions } from "nativescript-angular/router";
-import { ListViewEventData } from "nativescript-pro-ui/listview";
-import { DrawerTransitionBase, SlideInOnTopTransition } from "nativescript-pro-ui/sidedrawer";
-import { RadSideDrawerComponent } from "nativescript-pro-ui/sidedrawer/angular";
+import {
+    ListViewEventData, ListViewLinearLayout, ListViewLoadOnDemandMode,
+    RadListView
+} from "nativescript-ui-listview";
+import { DrawerTransitionBase, SlideInOnTopTransition } from "nativescript-ui-sidedrawer";
+import { RadSideDrawerComponent } from "nativescript-ui-sidedrawer/angular";
 import { isAndroid, isIOS } from "platform";
 
+import { progress } from "@progress/jsdo-core";
 import { EventData, View } from "tns-core-modules/ui/core/view/view";
 import { alert, confirm } from "tns-core-modules/ui/dialogs";
 import { JsdoSettings } from "../../shared/jsdo.settings";
+import { ProgressService } from "../../shared/progress.service";
 import { Customer } from "../shared/customer.model";
 import { CustomerService } from "../shared/customer.service";
 
@@ -29,6 +34,11 @@ export class CustomerListComponent implements OnInit {
     @ViewChild("drawer") drawerComponent: RadSideDrawerComponent;
 
     search: string;
+    scrollCount = 0;   // This keeps track of number of times user performed scrolling
+    // This would allow us to calculate number of records loaded at client side
+    _recCount: number;
+    _skipRec: number;
+    _pullToRefreshCount = 0;    // We use this to keep track of howmany times refresh performed
 
     private _isLoading: boolean = false;
     private _customers: ObservableArray<Customer> = new ObservableArray<Customer>([]);
@@ -39,8 +49,20 @@ export class CustomerListComponent implements OnInit {
 
     constructor(
         private _customerService: CustomerService,
-        private _routerExtensions: RouterExtensions
+        private _routerExtensions: RouterExtensions,
+        private _changeDetectionRef: ChangeDetectorRef,
+        private _progressService: ProgressService
     ) {
+        this._progressService.isLoggedin$.subscribe((isLoggedIn) => {
+            if (!isLoggedIn) {
+                this._routerExtensions.navigate(["/login"], {
+                    clearHistory: true,
+                    transition: {
+                        name: "fade"
+                    }
+                });
+            }
+        });
     }
 
     /* ***********************************************************
@@ -125,7 +147,6 @@ export class CustomerListComponent implements OnInit {
     }
 
     onLeftSwipeClick(args: ListViewEventData) {
-        // debugger;
         const customerItem = args.view.bindingContext;
         const customerName = customerItem.Name;
         const options = {
@@ -141,12 +162,13 @@ export class CustomerListComponent implements OnInit {
                 if (result) {
                     this._customerService.delete(customerItem)
                         .then((result1) => {
-                            // Delete was successful, so we can accept the changes
-                            this._customerService.acceptChanges();
-                            this._fetchCustomers();
+                            this._customers.forEach((item) => {
+                                if (item.CustNum === customerItem.CustNum) {
+                                    this._customers.splice(this._customers.indexOf(item), 1);
+                                }
+                            });
                         }, (error) => {
                             // Delete was not successful, so let's back out the deletion
-                            this._customerService.cancelChanges();
                             if (error && error.message) {
                                 alert({ title: "Error", message: error.message, okButtonText: "Ok" });
                             } else {
@@ -165,6 +187,8 @@ export class CustomerListComponent implements OnInit {
 
     onSearchChange(args?: EventData) {
         let searchFilter: any = JsdoSettings.searchFilter;
+        let params;
+
         try {
             if (typeof (searchFilter) === "object") {
                 searchFilter = JSON.parse(
@@ -178,13 +202,20 @@ export class CustomerListComponent implements OnInit {
             searchFilter = "";
         }
 
-        const params = this.search.length === 0 ? {
-            filter: JsdoSettings.filter,
-            sort: JsdoSettings.sort
-        } : {
+        if (this.search.length === 0) {
+            params = {
+                filter: JsdoSettings.filter,
+                sort: JsdoSettings.sort,
+                top: JsdoSettings.pageSize,
+                skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize)
+            };
+            this._skipRec = 0; // Reset the skiplist if the search is cleared off
+        } else {
+            params = {
                 filter: searchFilter,
                 sort: { field: "Name", dir: "asc" }
             };
+        }
 
         if (this.timer) {
             clearTimeout(this.timer);
@@ -199,7 +230,7 @@ export class CustomerListComponent implements OnInit {
             event.object.android.clearFocus();
         }
     }
-    
+
     /**
      * This gets triggered when refresh (Pull down) operation is performed in the Listview
      * in mobile app. As part of this we perform a read() operation with same filter criteria
@@ -207,28 +238,117 @@ export class CustomerListComponent implements OnInit {
      * @param args - ListViewEventData
      */
     onPullToRefreshInitiated(args: ListViewEventData) {
-        console.log("In onPullToRefreshInitiated()");
-
+        const listView: RadListView = args.object;
         // Check for the value of ngModel's search value. If it is set then perform the read based on search criteria
-        // If this no set, the read customer information from server via Data Service directly
+        // If this not set, then read customer information from server via Data Service directly
         if (this.search === undefined) {
             // We want to use the same filter criteria while refreshing the listview
             const params = {
                 filter: JsdoSettings.filter,
-                sort: JsdoSettings.sort
+                sort: JsdoSettings.sort,
+                top: JsdoSettings.pageSize,
+                skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize)
+                // mergeMode: JsdoSettings.mergeMode    // We dont need to use mergeMode in case of refreshing
+                // In this scenario we want to fetch list based on original filter criteria only
             };
 
-            this._fetchCustomers(params);
+            if (this.timer) {
+                clearTimeout(this.timer);
+            }
+            if (args.object.loadOnDemandMode === ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None]) {
+                this._skipRec = 0; // Because listView.loadOnDemandMode navigates to its function and makes read call
+                listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.Auto];
+            }
+
+            this.timer = setTimeout(() => {
+                this._fetchCustomers(params);
+                listView.notifyPullToRefreshFinished();
+            }, 50);
+
         } else {
             this.onSearchChange();
+            listView.notifyPullToRefreshFinished();
         }
-        
-        var listView = args.object;
-        listView.notifyPullToRefreshFinished();
+
+        this._pullToRefreshCount = this._pullToRefreshCount + 1;
+        this._skipRec = 0; // Reset the skiplist once a refresh is performed
     }
 
     /**
-     * This function is responsible for fetching customers remotely via 
+     * Gets triggered when performing 'incremental scrolling' of data in the mobile screen.
+     * This method is responsible for fetching more records from backend
+     * @param args ListViewEventData
+     */
+    onLoadMoreItemsRequested(args: ListViewEventData) {
+        if (this.search === undefined || this.search.length === 0) {
+
+            this.scrollCount = this.scrollCount + 1;
+
+            // Build a params object which then can be passed to DataSource
+            const params = {
+                filter: JsdoSettings.filter,
+                sort: JsdoSettings.sort,
+                top: JsdoSettings.pageSize,
+                skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize),
+                pageSize: JsdoSettings.pageSize,
+                maxRecCount: JsdoSettings.maxRecCount,
+                // Default value is set to MODE_MERGE for 'Incremental Scrolling'
+                mergeMode: progress.data.JSDO.MODE_MERGE
+            };
+
+            if (!this._skipRec) {
+                this._skipRec = params.skip;
+            }
+
+            // Let's modify/increment the skip value considering a read() hasbeen performed
+            // by the Incremental Scrolling functionality.
+            params.skip = this._skipRec + params.pageSize;
+            this._skipRec = params.skip;
+
+            this._recCount = this._customers.length;
+
+            // If max record count is available/specified in the settings or if the number of records
+            //  loaded in client reaches to max count then send an alert
+            if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount)
+                && (this._recCount) === (params.maxRecCount))) {
+                this._isLoading = false;
+                args.object.notifyLoadOnDemandFinished();
+                alert("Reached max size. Increase limit.");
+            } else {
+
+                const listView: RadListView = args.object;
+                this._customerService.load(params)
+                    .finally(() => {
+                        this._isLoading = false;
+                    })
+                    .subscribe((customers: Array<Customer>) => {
+                        customers.splice(0, this._customers.length);
+                        this._customers.push(customers);
+                        this._isLoading = false;
+
+                        // Setting the loadOnDemandMode to None if the last resultset from server is empty
+                        if (this._customerService.dataSource._isLastResultSetEmpty) {
+                            listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
+                            this._isLoading = false;
+                        }
+
+                        args.object.notifyLoadOnDemandFinished();
+                    }, (error) => {
+                        if (error && error.message) {
+                            alert("Error: \n" + error.message);
+                        } else {
+                            alert("Error reading records - onLoadMoreItemsRequested() section");
+                        }
+                    });
+                args.returnValue = true;
+            }
+        } else {
+            args.object.notifyLoadOnDemandFinished();
+        }
+    }
+
+    /**
+     * This function is responsible for fetching customers remotely via
      * Progress Data Service
      * @param params - A parameter object which includes filtering and
      * sorting criteria
@@ -236,13 +356,14 @@ export class CustomerListComponent implements OnInit {
     private _fetchCustomers(params?: any) {
         this._customerService.load(params)
             .finally(() => {
-                this._isLoading = false
+                this._isLoading = false;
             })
             .subscribe((customers: Array<Customer>) => {
                 this._customers = new ObservableArray(customers);
                 this._isLoading = false;
             }, (error) => {
-                console.log("In _fetchCustomers() Error section: " + error);
+                // If we're unauthorized, we need to re-login.
+                // Otherwise, we display the error
                 if (error && error.message) {
                     alert("Error: \n" + error.message);
                 } else {

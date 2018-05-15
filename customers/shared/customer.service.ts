@@ -6,7 +6,7 @@ import "rxjs/add/observable/of";
 import { Observable } from "rxjs/Observable";
 import { Customer } from "./customer.model";
 
-import { DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
+import { DataResult, DataSource, DataSourceOptions } from "@progress/jsdo-nativescript";
 import { JsdoSettings } from "../../shared/jsdo.settings";
 import { ProgressService } from "../../shared/progress.service";
 
@@ -19,8 +19,8 @@ import { ProgressService } from "../../shared/progress.service";
 @Injectable()
 export class CustomerService {
 
+    dataSource: DataSource;
     private jsdo: progress.data.JSDO;
-    private dataSource: DataSource;
     private jsdoSettings: JsdoSettings = new JsdoSettings();
 
     constructor(private _ngZone: NgZone,
@@ -28,7 +28,6 @@ export class CustomerService {
         // Basically, if a logout event is triggered by our progress service,
         // we clear out the data source. Because we're good people
         this._progressService.isLoggedin$.subscribe((isLoggedIn) => {
-            console.log("we got triggered: " + isLoggedIn);
             if (!isLoggedIn) {
                 this.dataSource = undefined;
             }
@@ -51,7 +50,9 @@ export class CustomerService {
                     jsdo: this.jsdo,
                     tableRef: JsdoSettings.tableRef,
                     filter: JsdoSettings.filter,
-                    sort: JsdoSettings.sort
+                    sort: JsdoSettings.sort,
+                    top: JsdoSettings.pageSize,
+                    skip: ((JsdoSettings.pageNumber) - 1) * (JsdoSettings.pageSize)
                 });
 
                 successFn();
@@ -66,26 +67,33 @@ export class CustomerService {
     load(params?: progress.data.FilterOptions): Observable<any> {
         let promise;
         if (this.dataSource) {
-            if (params) {
                 promise = new Promise((resolve, reject) => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
-                        reject(new Error("Error reading records: " + error.message));
+                        if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
+                            this._progressService.logout();
+                            reject(new Error("Your session is no longer valid. Please log in to continue."));
+                        } else {
+                            reject(new Error("Error reading records: " + error.message));
+                        }
                     });
                 });
 
                 return Observable.fromPromise(promise).catch(this.handleErrors);
-            } else {
-                return Observable.of(this.dataSource.getData());
-            }
         } else {
             promise = new Promise((resolve, reject) => {
                 this.createDataSource(() => {
-                    this.dataSource.read(params).subscribe((myData: Array<Customer>) => {
-                        resolve(myData);
+                    this.dataSource.read(params).subscribe((myData: DataResult) => {
+                        resolve(myData.data);
                     }, (error) => {
-                        reject(new Error("Error reading records: " + error.message));
+                        if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
+                            this._progressService.logout();
+                            reject(new Error("Your session is no longer valid. Please log in to continue."));
+
+                        } else {
+                            reject(new Error("Error reading records: " + error.message));
+                        }
                     });
                 }, (error) => {
                     const message = (error && error.message) ? error.message : "Error reading records.";
@@ -120,52 +128,29 @@ export class CustomerService {
     }
 
     /**
-     * Accepts any pending changes from the underlying data source
-     */
-    acceptChanges(): void {
-        this.dataSource.acceptChanges();
-    }
-
-    /**
-     * Cancels any pending changes from the underlying data source
-     */
-    cancelChanges(): void {
-        this.dataSource.cancelChanges();
-    }
-
-    /**
      * Returns true if datasource provides edit capabilities, records can be created, updated and deleted.
      * If not, it returns false.
      */
     hasEditSupport(): boolean {
         return this.dataSource.hasCUDSupport() || this.dataSource.hasSubmitSupport();
     }
+
     sync(): Promise<any> {
         let promise;
 
         promise = new Promise(
             (resolve, reject) => {
                 // Call dataSource.saveChanges() to send any pending changes to backend
-                this.dataSource.saveChanges().subscribe(()=>{
+                this.dataSource.saveChanges().subscribe(() => {
                     resolve();
-                }, (errors) => {
-                        let errorMsg: string = "SaveChanges failed..";
-
-                        if (errors) {
-                            if (typeof errors === "string") {
-                                errorMsg = errors;
-                            } else if (Array.isArray(errors)) {
-                                // This would occur when error info returned from jsdo.getErrors()
-                                // For now, only one error message should be returned since app is processing
-                                // single row changes
-                                errors.forEach((err) => {
-                                    errorMsg = err.error;
-                                });
-                            }
-                        }
-
-                        reject(new Error(errorMsg));
-                    });
+                }, (error) => {
+                    if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
+                        this._progressService.logout();
+                        reject(new Error("Your session is no longer valid. Please log in to continue."));
+                    } else {
+                        reject(error);
+                    }
+                });
             }
         );
 

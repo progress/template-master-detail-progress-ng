@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { RouterExtensions } from "nativescript-angular/router";
-import { RadSideDrawerComponent } from "nativescript-pro-ui/sidedrawer/angular";
+import { RadSideDrawerComponent } from "nativescript-ui-sidedrawer/angular";
 import { ItemEventData } from "ui/list-view";
 
 import { navigationCancelingError } from "@angular/router/src/shared";
@@ -80,19 +80,14 @@ export class SideDrawerComponent implements OnInit {
     }
 
     onLogout(): void {
-        confirm("Are you sure you want to log out?")
-            .then((result) => {
-                if (result) {
-                    return this.progressService.logout()
-                        .then(() => {
-                            this.routerExtensions.navigate(["/login"], {
-                                clearHistory: true,
-                                transition: {
-                                    name: "fade"
-                                }
-                            });
-                        });
-                }
+        this.progressService.logout()
+            .then(() => {
+                this.routerExtensions.navigate(["/login"], {
+                    clearHistory: true,
+                    transition: {
+                        name: "fade"
+                    }
+                });
             });
     }
 

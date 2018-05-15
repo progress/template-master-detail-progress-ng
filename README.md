@@ -7,6 +7,10 @@ App templates help you jump start your native cross-platform apps with built-in 
 This Master-Detail template is a fundamental building block for any app that displays collection of objects and their details.
 
 The Master Detail template provides support for CRUD operations, server-filtering and server-side sorting using an OpenEdge backend.
+The following authentication modes can be used:
+* Anonymous 
+* Basic authentication
+* Form-based authentication
 
 ## Quick Start
 Execute the following command to create an app from this template:
