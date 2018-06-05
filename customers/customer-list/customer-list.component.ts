@@ -311,6 +311,7 @@ export class CustomerListComponent implements OnInit {
             //  loaded in client reaches to max count then send an alert
             if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount)
                 && (this._recCount) === (params.maxRecCount))) {
+                listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
                 this._isLoading = false;
                 args.object.notifyLoadOnDemandFinished();
                 alert("Reached max size. Increase limit.");
