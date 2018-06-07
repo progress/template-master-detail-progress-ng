@@ -306,18 +306,18 @@ export class CustomerListComponent implements OnInit {
             this._skipRec = params.skip;
 
             this._recCount = this._customers.length;
+            const listView: RadListView = args.object;
 
             // If max record count is available/specified in the settings or if the number of records
             //  loaded in client reaches to max count then send an alert
             if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount)
-                && (this._recCount) === (params.maxRecCount))) {
-                listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
+                && (this._recCount) === (params.maxRecCount))) {                
                 this._isLoading = false;
-                args.object.notifyLoadOnDemandFinished();
+                args.object.notifyLoadOnDemandFinished();                
                 alert("Reached max size. Increase limit.");
+                listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
             } else {
-
-                const listView: RadListView = args.object;
+                
                 this._customerService.load(params)
                     .finally(() => {
                         this._isLoading = false;
