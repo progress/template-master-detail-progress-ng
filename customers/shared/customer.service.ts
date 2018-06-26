@@ -24,15 +24,15 @@ export class CustomerService {
     private jsdoSettings: JsdoSettings = new JsdoSettings();
 
     constructor(private _ngZone: NgZone,
-                private _progressService: ProgressService) {
-        // Basically, if a logout event is triggered by our progress service,
-        // we clear out the data source. Because we're good people
-        this._progressService.isLoggedin$.subscribe((isLoggedIn) => {
-            if (!isLoggedIn) {
-                this.dataSource = undefined;
-            }
-        });
-     }
+                private _progressService: ProgressService
+                ) { }
+
+    // Clear out the datasource when we logout because we're good people
+    // Place any other cleanup code for logging out here
+    logout() {
+        this.dataSource = undefined;
+        this._progressService.logout();
+    }
 
     getCustomerById(id: string): Customer {
         if (!id) {
@@ -72,7 +72,7 @@ export class CustomerService {
                         resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
-                            this._progressService.logout();
+                            this.logout();
                             reject(new Error("Your session is no longer valid. Please log in to continue."));
                         } else {
                             reject(new Error("Error reading records: " + error.message));
@@ -88,7 +88,7 @@ export class CustomerService {
                         resolve(myData.data);
                     }, (error) => {
                         if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
-                            this._progressService.logout();
+                            this.logout();
                             reject(new Error("Your session is no longer valid. Please log in to continue."));
 
                         } else {
@@ -145,7 +145,7 @@ export class CustomerService {
                     resolve();
                 }, (error) => {
                     if (error.toString() === "Error: Error: HTTP Status 401 Unauthorized") {
-                        this._progressService.logout();
+                        this.logout();
                         reject(new Error("Your session is no longer valid. Please log in to continue."));
                     } else {
                         reject(error);
