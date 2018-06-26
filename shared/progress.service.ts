@@ -3,6 +3,7 @@ import { progress } from "@progress/jsdo-core";
 import { JsdoSettings } from "./jsdo.settings";
 
 import { Component, Injectable } from "@angular/core";
+import { RouterExtensions } from "nativescript-angular/router";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 /* *************************************************************************************
@@ -29,6 +30,10 @@ export class ProgressService {
   isLoggedin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   private jsdosession: progress.data.JSDOSession;
+
+  constructor(
+    private _routerExtensions: RouterExtensions,
+  ) { }
 
   isLoggedIn() {
     if (this.jsdosession) {
@@ -60,6 +65,13 @@ export class ProgressService {
 
     this.jsdosession = undefined;
     this.isLoggedin$.next(false);
+
+    this._routerExtensions.navigate(["/login"], {
+      clearHistory: true,
+      transition: {
+          name: "fade"
+      }
+    });
 
     return promise;
   }

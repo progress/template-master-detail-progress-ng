@@ -52,18 +52,7 @@ export class CustomerListComponent implements OnInit {
         private _routerExtensions: RouterExtensions,
         private _changeDetectionRef: ChangeDetectorRef,
         private _progressService: ProgressService
-    ) {
-        this._progressService.isLoggedin$.subscribe((isLoggedIn) => {
-            if (!isLoggedIn) {
-                this._routerExtensions.navigate(["/login"], {
-                    clearHistory: true,
-                    transition: {
-                        name: "fade"
-                    }
-                });
-            }
-        });
-    }
+    ) { }
 
     /* ***********************************************************
     * Use the "ngOnInit" handler to get the data and assign it to the
@@ -154,8 +143,8 @@ export class CustomerListComponent implements OnInit {
             message: "\"" + customerName + "\" will be deleted forever.",
             okButtonText: "Delete",
             title: "Delete"
-
         };
+        
         confirm(options)
             .then((result: boolean) => {
                 // result can be true/false
