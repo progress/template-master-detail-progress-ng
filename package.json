@@ -1,6 +1,10 @@
 {
     "name": "tns-template-master-detail-progress-ng",
+<<<<<<< HEAD
     "version": "5.0.0",
+=======
+    "version": "5.1.0",
+>>>>>>> 34a126d... Update package.json file
     "displayName": "Master-Detail with Progress Data Service",
     "templateType": "App template",
     "main": "main.js",
