@@ -244,9 +244,9 @@ export class CustomerListComponent implements OnInit {
             if (this.timer) {
                 clearTimeout(this.timer);
             }
-            if (args.object.loadOnDemandMode === ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None]) {
+            if (args.object.loadOnDemandMode === ListViewLoadOnDemandMode.None) {
                 this._skipRec = 0; // Because listView.loadOnDemandMode navigates to its function and makes read call
-                listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.Auto];
+                listView.loadOnDemandMode = ListViewLoadOnDemandMode.Auto;
             }
 
             this.timer = setTimeout(() => {
@@ -304,7 +304,7 @@ export class CustomerListComponent implements OnInit {
                 this._isLoading = false;
                 args.object.notifyLoadOnDemandFinished();                
                 alert("Reached max size. Increase limit.");
-                listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
+                listView.loadOnDemandMode = ListViewLoadOnDemandMode.None;
             } else {
                 
                 this._customerService.load(params)
@@ -318,7 +318,7 @@ export class CustomerListComponent implements OnInit {
 
                         // Setting the loadOnDemandMode to None if the last resultset from server is empty
                         if (this._customerService.dataSource._isLastResultSetEmpty) {
-                            listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
+                            listView.loadOnDemandMode = ListViewLoadOnDemandMode.None;
                             this._isLoading = false;
                         }
 
