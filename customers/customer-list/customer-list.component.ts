@@ -52,18 +52,7 @@ export class CustomerListComponent implements OnInit {
         private _routerExtensions: RouterExtensions,
         private _changeDetectionRef: ChangeDetectorRef,
         private _progressService: ProgressService
-    ) {
-        this._progressService.isLoggedin$.subscribe((isLoggedIn) => {
-            if (!isLoggedIn) {
-                this._routerExtensions.navigate(["/login"], {
-                    clearHistory: true,
-                    transition: {
-                        name: "fade"
-                    }
-                });
-            }
-        });
-    }
+    ) { }
 
     /* ***********************************************************
     * Use the "ngOnInit" handler to get the data and assign it to the
@@ -154,8 +143,8 @@ export class CustomerListComponent implements OnInit {
             message: "\"" + customerName + "\" will be deleted forever.",
             okButtonText: "Delete",
             title: "Delete"
-
         };
+        
         confirm(options)
             .then((result: boolean) => {
                 // result can be true/false
@@ -255,9 +244,9 @@ export class CustomerListComponent implements OnInit {
             if (this.timer) {
                 clearTimeout(this.timer);
             }
-            if (args.object.loadOnDemandMode === ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None]) {
+            if (args.object.loadOnDemandMode === ListViewLoadOnDemandMode.None) {
                 this._skipRec = 0; // Because listView.loadOnDemandMode navigates to its function and makes read call
-                listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.Auto];
+                listView.loadOnDemandMode = ListViewLoadOnDemandMode.Auto;
             }
 
             this.timer = setTimeout(() => {
@@ -306,17 +295,18 @@ export class CustomerListComponent implements OnInit {
             this._skipRec = params.skip;
 
             this._recCount = this._customers.length;
+            const listView: RadListView = args.object;
 
             // If max record count is available/specified in the settings or if the number of records
             //  loaded in client reaches to max count then send an alert
             if (params.maxRecCount && (((this.scrollCount) * (params.pageSize) === params.maxRecCount)
-                && (this._recCount) === (params.maxRecCount))) {
+                && (this._recCount) === (params.maxRecCount))) {                
                 this._isLoading = false;
-                args.object.notifyLoadOnDemandFinished();
+                args.object.notifyLoadOnDemandFinished();                
                 alert("Reached max size. Increase limit.");
+                listView.loadOnDemandMode = ListViewLoadOnDemandMode.None;
             } else {
-
-                const listView: RadListView = args.object;
+                
                 this._customerService.load(params)
                     .finally(() => {
                         this._isLoading = false;
@@ -328,7 +318,7 @@ export class CustomerListComponent implements OnInit {
 
                         // Setting the loadOnDemandMode to None if the last resultset from server is empty
                         if (this._customerService.dataSource._isLastResultSetEmpty) {
-                            listView.loadOnDemandMode = ListViewLoadOnDemandMode[ListViewLoadOnDemandMode.None];
+                            listView.loadOnDemandMode = ListViewLoadOnDemandMode.None;
                             this._isLoading = false;
                         }
 
