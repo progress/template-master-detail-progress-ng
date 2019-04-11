@@ -8,6 +8,10 @@ export class JsdoSettings {
     // The state resource can be found in the web application specified by the above serviceURI property
     static stateResourceName = "State";
     static stateTableRef = "ttState";
+    // SalesRepService (in salesrep.service.ts) represents a data service which provides sales rep info.
+    // The sales rep resource can be found in the web application specified by the above serviceURI property
+    static salesRepResourceName = "SalesRep";
+    static salesRepTableRef = "ttSalesrep";    
 
     // Initial filter and sort options for queries with the DataSource
 

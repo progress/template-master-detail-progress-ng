@@ -34,7 +34,7 @@
                 <TextField  [(ngModel)]="customer.Country" class="item-list-even"></TextField>
 
                 <Label text="Sales Rep" class="item-list-odd"></Label>
-                <TextField [(ngModel)]="customer.SalesRep" class="item-list-even"></TextField>
+                <ListPicker [items]="salesRepNames" [selectedIndex]="salesRepIndexValue" (selectedIndexChange)="selectedRepIndexChanged($event)" class="p-15"></ListPicker>
 
                 <GridLayout rows="*, 55" columns="*, auto" class="car-list-odd">
                     <Label text="Credit Limit"></Label>
