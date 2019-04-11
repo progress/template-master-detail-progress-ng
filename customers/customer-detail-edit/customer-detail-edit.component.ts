@@ -9,6 +9,8 @@ import { Customer } from "../shared/customer.model";
 import { CustomerService } from "../shared/customer.service";
 import { State } from "../shared/state.model";
 import { StateService } from "../shared/state.service";
+import { SalesRep } from "../shared/salesrep.model";
+import { SalesRepService } from "../shared/salesrep.service";
 
 /* ***********************************************************
 * This is the item detail edit component.
@@ -28,13 +30,17 @@ export class CustomerDetailEditComponent implements OnInit {
     private _addMode: boolean = false;
     private _stateIndexValue: number = 0;
     private _editDetailTitle: string;
+    private _salesRepNameList: Array<string> = [];
+    private _salesRepList: Array<string> = [];
+    private _salesRepIndexValue: number = 0;
 
     constructor(
         private _customerService: CustomerService,
         private _customerEditService: CustomerEditService,
         private _pageRoute: PageRoute,
         private _routerExtensions: RouterExtensions,
-        private _stateService: StateService
+        private _stateService: StateService,
+        private _salesRepService: SalesRepService
     ) { }
 
     /* ***********************************************************
@@ -59,8 +65,13 @@ export class CustomerDetailEditComponent implements OnInit {
                 // Note: startCreate() will create record client-side. This allows us to retreive initial values
                 this._customer = ((this._addMode === true) ? this._customerEditService.startCreate()
                     : this._customerEditService.startEdit(customerId));
+                
                 const stateIndex = this._stateList.indexOf(this._customer.State);
                 this.stateIndexValue = (stateIndex >= 0) ? stateIndex : 0;
+
+                const salesRepIndex = this._salesRepList.indexOf(this._customer.SalesRep);
+                this._salesRepIndexValue = (salesRepIndex >= 0) ? salesRepIndex : 0;
+
             });
     }
 
@@ -90,6 +101,20 @@ export class CustomerDetailEditComponent implements OnInit {
     set stateIndexValue(value: number) {
         this._stateIndexValue = value;
     }
+
+    get salesRepNames(): Array<string> {
+        if (this._salesRepNameList.length > 0) {
+            return this._salesRepNameList;
+        } else {
+            return null;
+        }
+    }
+    get salesRepIndexValue(): number {
+        return this._salesRepIndexValue;
+    }
+    set salesRepIndexValue(value: number) {
+        this._salesRepIndexValue = value;
+    }    
 
     get creditLimitValue(): number {
         return this._customer.CreditLimit;
@@ -178,6 +203,13 @@ export class CustomerDetailEditComponent implements OnInit {
         // List is displayed with State.StateNames, but Customer.State maps to State.State property
         this._customer.State = this._stateList[picker.selectedIndex];
     }
+
+    selectedRepIndexChanged(args) {
+        const picker = <ListPicker>args.object;
+
+        // List is displayed with SalesRep.RepNames, but Customer.SalesRep maps to SalesRep.SalesRep property
+        this._customer.SalesRep = this._salesRepList[picker.selectedIndex];        
+    }
     onDeleteButtonTap(): void {
         if (!this._addMode) {
             const customerItem = this._customer;
@@ -248,5 +280,23 @@ export class CustomerDetailEditComponent implements OnInit {
         }, (error) => {
             console.log("Error: " + error.message);
         });
+
+        // Get sales rep data to be used by SalesRep ListPicker
+        this._salesRepService.load()
+        .finally(() =>  {
+            this._isBusy = false;
+        })
+        .subscribe((salesRepRecords: Array<SalesRep>) => {
+            for (const salesRep of salesRepRecords) {
+                this._salesRepNameList.push(salesRep.RepName);
+                this._salesRepList.push(salesRep.SalesRep);
+        }
+
+            // Want to initialize ListPicker to current customer's salesRep
+            const salesRepIndex = this._salesRepList.indexOf(this._customer.SalesRep);
+            this.salesRepIndexValue = (salesRepIndex >= 0) ? salesRepIndex : 0;
+        }, (error) => {
+            console.log("Error: " + error.message);
+        });        
     }
 }

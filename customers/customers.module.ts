@@ -11,6 +11,7 @@ import { CustomersRoutingModule } from "./customers-routing.module";
 import { CustomerEditService } from "./shared/customer-edit.service";
 import { CustomerService } from "./shared/customer.service";
 import { StateService } from "./shared/state.service";
+import { SalesRepService } from "./shared/salesrep.service";
 
 @NgModule({
     imports: [
@@ -28,7 +29,8 @@ import { StateService } from "./shared/state.service";
     providers: [
         CustomerService,
         CustomerEditService,
-        StateService
+        StateService,
+        SalesRepService
     ],
     schemas: [
         NO_ERRORS_SCHEMA
